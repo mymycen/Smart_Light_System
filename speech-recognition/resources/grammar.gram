@@ -1,9 +1,0 @@
-#JSGF V1.0;
-
-/**
- * JSGF Grammar 
- */
-
-grammar grammar;
-
-public <syntax>  = (bedroom|living room|kitchen|office|change light color to red| turn light on |  turn light off| ready| stop);
