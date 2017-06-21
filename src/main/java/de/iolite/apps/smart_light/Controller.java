@@ -322,8 +322,137 @@ public final class Controller extends AbstractIOLITEApp {
 		LOGGER.debug("Started");
 		speechThreadshouldStart = false;
 		//executeVoiceCommand();
+		detectMovement();
 	}
 
+	private void detectMovement() throws DeviceAPIException {
+		LOGGER.info("es läuft");
+		
+		this.deviceAPI.setObserver(new DeviceAddAndRemoveLogger());
+
+		List <Device> deviceList = deviceAPI.getDevices();
+		for (Device device: deviceList){
+			if(device.getProfileIdentifier().equals("http://iolite.de#MovementSensor")){
+				DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
+				if(onProperty!=null){
+					
+					
+					onProperty.setObserver(new DeviceOnOffStatusLogger(device.getIdentifier()));
+					onProperty.setObserver(new DeviceBooleanPropertyObserver() {
+						
+						@Override
+						public void valueChanged(Boolean arg0) {
+							
+							
+							
+							
+						}
+						
+						@Override
+						public void keyChanged(String arg0) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void deviceChanged(Device arg0) {
+							// TODO Auto-generated method stub
+							
+						}
+					});
+					
+					
+					if(onProperty.getValue()){
+			
+
+					
+					 for( Location location : rooms){
+						if(location.getName().equals("Living_room")){
+							List<de.iolite.app.api.environment.Device> devices = location.getDevices();
+							for (de.iolite.app.api.environment.Device livingDevice : devices){
+
+								String deviceIdentifier = livingDevice.getIdentifier();
+								for (Device deviceControl : deviceAPI.getDevices()) {
+
+								if (deviceControl.getIdentifier().equals("http://iolite.de#DimmableLamp")
+										||deviceControl.getIdentifier().equals("http://iolite.de#HSVLamp")
+										|| deviceControl.getIdentifier().equals("http://iolite.de#Lamp")){
+									
+									final DeviceBooleanProperty onProperty1 = deviceControl
+											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+									if (onProperty1.getValue() == false) {
+										onProperty1.requestValueUpdate(true);
+										LOGGER.info("LICHT ANGESCHALTET");
+										
+
+										onProperty1.setObserver(new DeviceBooleanPropertyObserver() {
+
+											@Override
+											public void valueChanged(Boolean arg0) {
+												// TODO Auto-generated method
+												// stub
+												
+												
+												isLightTurnedon = true;
+
+											}
+
+											@Override
+											public void keyChanged(String arg0) {
+												// TODO Auto-generated method
+												// stub
+
+											}
+
+											@Override
+											public void deviceChanged(Device arg0) {
+												// TODO Auto-generated method
+												// stub
+
+											}
+										});
+
+									
+									
+								}
+									
+								}
+								
+								
+							}
+							
+}
+							
+							
+						}
+					}
+					
+					}
+					
+				
+				}
+				
+			}
+			
+			
+			
+		}
+		
+		/*
+		for (final Device device : this.deviceAPI.getDevices()) {
+			// let's get the 'on/off' status property
+			final DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+			final Boolean onValue;
+			if (onProperty != null && (onValue = onProperty.getValue()) != null) {
+				LOGGER.debug("toggling device '{}'", device.getIdentifier());
+				try {
+					onProperty.requestValueUpdate(!onValue);
+				} catch (final DeviceAPIException e) {
+					LOGGER.error("Failed to control device", e);
+				}
+			}
+		}
+*/
 	/**
 	 * {@inheritDoc}
 	 */
