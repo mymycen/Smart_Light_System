@@ -71,6 +71,29 @@ import java.util.concurrent.TimeUnit;
  * @since 1.0
  */
 public final class Controller extends AbstractIOLITEApp {
+	public Controller() {
+		// empty
+		
+	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
+
+	/* App APIs */
+	private FrontendAPI frontendAPI;
+	private StorageAPI storageAPI;
+	private static DeviceAPI deviceAPI;
+	private static EnvironmentAPI environmentAPI;
+	private UserAPI userAPI;
+
+	private HeatingAPI heatingAPI;
+
+	/** front end assets */
+	private Disposeable disposeableAssets;
+
+	/**
+	 * <code>ExampleApp</code> constructor. An IOLITE App must have a public,
+	 * parameter-less constructor.
+	 */
 	
 	private Scheduler scheduler;
 	private LiveSpeechRecognizer recognizer;
@@ -81,6 +104,9 @@ public final class Controller extends AbstractIOLITEApp {
 	private static String currentLocation = "root";
 	boolean speechThreadshouldStart = false;
 	boolean speechThreadShouldEnd = false;
+	DeviceLogger dLogger = new DeviceLogger(LOGGER);
+	Movement movement = new Movement();
+
 
 	public enum Context {
 		WELCOME, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, CHANGE_LIGHT_COLOR, DONT_UNDERSTAND, ROOM_NOT_EXIST
@@ -98,7 +124,7 @@ public final class Controller extends AbstractIOLITEApp {
 					IOLITEHTTPResponse.JSON_CONTENT_TYPE);
 		}
 	}
-
+/*
 	private static final class DeviceAddAndRemoveLogger implements DeviceAPIObserver {
 
 		@Override
@@ -140,6 +166,7 @@ public final class Controller extends AbstractIOLITEApp {
 			}
 		}
 	}
+*/
 
 	/**
 	 * A response handler returning devices filtered by the property type.
@@ -222,29 +249,7 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 	}
 
-	@Nonnull
-	private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
-
-	/* App APIs */
-	private FrontendAPI frontendAPI;
-	private StorageAPI storageAPI;
-	private static DeviceAPI deviceAPI;
-	private static EnvironmentAPI environmentAPI;
-	private UserAPI userAPI;
-
-	private HeatingAPI heatingAPI;
-
-	/** front end assets */
-	private Disposeable disposeableAssets;
-
-	/**
-	 * <code>ExampleApp</code> constructor. An IOLITE App must have a public,
-	 * parameter-less constructor.
-	 */
-	public Controller() {
-		// empty
-		
-	}
+	
 
 	/**
 	 * {@inheritDoc}
@@ -320,7 +325,7 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 
 		LOGGER.debug("Started");
-		detectMovement();
+		movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
 		speechThreadshouldStart = false;
 	//	executeVoiceCommand();
 	}
@@ -348,7 +353,7 @@ public final class Controller extends AbstractIOLITEApp {
 	 */
 	private void initializeDeviceManager() {
 		// register a device observer
-		this.deviceAPI.setObserver(new DeviceAddAndRemoveLogger());
+		this.deviceAPI.setObserver(dLogger.new DeviceAddAndRemoveLogger());
 
 		// go through all devices, and register a property observer for ON/OFF
 		// properties
@@ -361,7 +366,7 @@ public final class Controller extends AbstractIOLITEApp {
 				LOGGER.debug("device '{}' has ON/OFF property, current value: '{}'", device.getIdentifier(),
 						onProperty.getValue());
 
-				onProperty.setObserver(new DeviceOnOffStatusLogger(device.getIdentifier()));
+				onProperty.setObserver(dLogger.new DeviceOnOffStatusLogger(device.getIdentifier()));
 			}
 		}
 
@@ -480,11 +485,12 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 	}
 	
+	/*
 	private void detectMovement(){
 		
-LOGGER.info("es läuft");
+		LOGGER.info("es läuft");
 		
-		this.deviceAPI.setObserver(new DeviceAddAndRemoveLogger());
+		this.deviceAPI.setObserver(dLogger.new DeviceAddAndRemoveLogger());
 
 		List <Device> deviceList = deviceAPI.getDevices();
 		for (Device device: deviceList){
@@ -493,31 +499,58 @@ LOGGER.info("es läuft");
 				if(onProperty!=null){
 					
 					
-					onProperty.setObserver(new DeviceOnOffStatusLogger(device.getIdentifier()));
+					onProperty.setObserver(dLogger.new DeviceOnOffStatusLogger(device.getIdentifier()));
 					onProperty.setObserver(new DeviceBooleanPropertyObserver() {
 						
 						@Override
 						public void valueChanged(Boolean arg0) {
-							LOGGER.info("Movement detected");							
-							for (Device light :deviceList){
-								if(light.getProfileIdentifier().equals("http://iolite.de#Lamp")){
-									final DeviceBooleanProperty onPropertylight = light.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+							LOGGER.info("Movement detected");
+							Location currentRoom = null;
+							List<Location> roomlist = environmentAPI.getLocations();
+							for(Location location : roomlist){
+								
+								for (de.iolite.app.api.environment.Device roomDevice :location.getDevices()){
 									
-									if (onPropertylight.getValue() == false && onProperty.getValue()==true) {
-										try {
-											onPropertylight.requestValueUpdate(true);
-											LOGGER.info("LICHT ANGESCHALTET");
-										} catch (DeviceAPIException e) {
-											e.printStackTrace();
+									for(Device deviceControl: deviceList){
+									if (deviceControl.getProfileIdentifier().equals(("http://iolite.de#MovementSensor"))&&deviceControl.getIdentifier().equals(roomDevice.getIdentifier())){
+										
+										
+									final DeviceBooleanProperty onPropertyMove = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
+										if (onPropertyMove.getValue()){
+									
+									
+
+											for(Device deviceControl2: deviceList){
+		
+										for(de.iolite.app.api.environment.Device lightdevices : location.getDevices()){
+										
+											if(deviceControl2.getProfileIdentifier().equals("http://iolite.de#Lamp")&&deviceControl2.getIdentifier().equals(lightdevices.getIdentifier())){
+												final DeviceBooleanProperty onPropertylight = deviceControl2.getBooleanProperty((DriverConstants.PROPERTY_on_ID));
+												
+												
+												if (onPropertylight.getValue() == false && onPropertyMove.getValue()==true) {
+											try {
+												onPropertylight.requestValueUpdate(true);
+												LOGGER.info("Light is on in the " + location.getName());
+												
+											} catch (DeviceAPIException e) {
+												e.printStackTrace();
+											}
+										
 										}
-									
-									
-									
+										
+									}
+									}
+									}
+									}
+									}
 								}
 								}
 								
-							
+				
+								
 							}
+															
 							
 						}
 						
@@ -540,6 +573,7 @@ LOGGER.info("es läuft");
 			
 		}
 	}
+	*/
 	private void executeVoiceCommand() {
 
 		LOGGER.debug("INFO", "Loading..\n");
