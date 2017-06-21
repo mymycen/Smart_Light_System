@@ -1,13 +1,10 @@
 # Introduction
 
-The _example-app_ is an example IOLITE App. It shows some basic examples of IOLITE
-API usage, as well as basics of the App UI development.
+The App uses the packagemanager by NodeJS. You have to download Node here : https://nodejs.org/en/download/ 
 
-Build with `mvn package`. Then put into `<user-home>/.iolite/apps` and install it in the HCC's _Apps/Store_ area.
+After downloading the code use `npm install` to install needed dependencies.
 
-You can use `-Deploy` option so maven puts the resulting file into `<user-home>/.iolite/apps` automatically, e.g. `mvn -Deploy package`.
-
-To use the project in Eclipse, call `mvn eclipse:eclipse -DdownloadJavadocs=true` to generate Eclipse project files.
+Build with `mvn package -Deploy` 
 
 # User Interface Resources
 
