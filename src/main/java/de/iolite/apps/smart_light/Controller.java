@@ -320,139 +320,10 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 
 		LOGGER.debug("Started");
-		speechThreadshouldStart = false;
-		//executeVoiceCommand();
-		detectMovement();
+		speechThreadshouldStart = true;
+		executeVoiceCommand();
 	}
 
-	private void detectMovement() throws DeviceAPIException {
-		LOGGER.info("es läuft");
-		
-		this.deviceAPI.setObserver(new DeviceAddAndRemoveLogger());
-
-		List <Device> deviceList = deviceAPI.getDevices();
-		for (Device device: deviceList){
-			if(device.getProfileIdentifier().equals("http://iolite.de#MovementSensor")){
-				DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
-				if(onProperty!=null){
-					
-					
-					onProperty.setObserver(new DeviceOnOffStatusLogger(device.getIdentifier()));
-					onProperty.setObserver(new DeviceBooleanPropertyObserver() {
-						
-						@Override
-						public void valueChanged(Boolean arg0) {
-							
-							
-							
-							
-						}
-						
-						@Override
-						public void keyChanged(String arg0) {
-							// TODO Auto-generated method stub
-							
-						}
-						
-						@Override
-						public void deviceChanged(Device arg0) {
-							// TODO Auto-generated method stub
-							
-						}
-					});
-					
-					
-					if(onProperty.getValue()){
-			
-
-					
-					 for( Location location : rooms){
-						if(location.getName().equals("Living_room")){
-							List<de.iolite.app.api.environment.Device> devices = location.getDevices();
-							for (de.iolite.app.api.environment.Device livingDevice : devices){
-
-								String deviceIdentifier = livingDevice.getIdentifier();
-								for (Device deviceControl : deviceAPI.getDevices()) {
-
-								if (deviceControl.getIdentifier().equals("http://iolite.de#DimmableLamp")
-										||deviceControl.getIdentifier().equals("http://iolite.de#HSVLamp")
-										|| deviceControl.getIdentifier().equals("http://iolite.de#Lamp")){
-									
-									final DeviceBooleanProperty onProperty1 = deviceControl
-											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									if (onProperty1.getValue() == false) {
-										onProperty1.requestValueUpdate(true);
-										LOGGER.info("LICHT ANGESCHALTET");
-										
-
-										onProperty1.setObserver(new DeviceBooleanPropertyObserver() {
-
-											@Override
-											public void valueChanged(Boolean arg0) {
-												// TODO Auto-generated method
-												// stub
-												
-												
-												isLightTurnedon = true;
-
-											}
-
-											@Override
-											public void keyChanged(String arg0) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-
-											@Override
-											public void deviceChanged(Device arg0) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-										});
-
-									
-									
-								}
-									
-								}
-								
-								
-							}
-							
-}
-							
-							
-						}
-					}
-					
-					}
-					
-				
-				}
-				
-			}
-			
-			
-			
-		}
-		
-		/*
-		for (final Device device : this.deviceAPI.getDevices()) {
-			// let's get the 'on/off' status property
-			final DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-			final Boolean onValue;
-			if (onProperty != null && (onValue = onProperty.getValue()) != null) {
-				LOGGER.debug("toggling device '{}'", device.getIdentifier());
-				try {
-					onProperty.requestValueUpdate(!onValue);
-				} catch (final DeviceAPIException e) {
-					LOGGER.error("Failed to control device", e);
-				}
-			}
-		}
-*/
 	/**
 	 * {@inheritDoc}
 	 */
@@ -632,13 +503,10 @@ public final class Controller extends AbstractIOLITEApp {
 
 		try {
 			recognizer = new LiveSpeechRecognizer(configuration);
-			
+			recognizer.startRecognition(true);
 		} catch (Exception ex) {
-			LOGGER.debug(ex.getMessage());
+			LOGGER.debug("PROBLEM" + ex.getMessage());
 		}
-
-		// Start recognition process pruning previously cached data.
-		recognizer.startRecognition(true);
 
 		// Start the Thread
 //		scheduler.execute(startSpeechThread());
@@ -651,24 +519,28 @@ public final class Controller extends AbstractIOLITEApp {
 				 * This method will return when the end of speech is
 				 * reached.
 				 */
-				SpeechResult speechResult = recognizer.getResult();
-				if (speechResult != null) {
+				if (recognizer != null) {
+					SpeechResult speechResult = recognizer.getResult();
 
-					speech = speechResult.getHypothesis();
-					LOGGER.debug("You said: [" + speech + "]\n");
-					processSpeech(speech);
 
-					speech = null;
-					speechResult = null;
-				//	scheduler.wait(3000);
+					if (speechResult != null) {
 
-				} else
-					LOGGER.debug("INFO", "I can't understand what you said.\n");
+						speech = speechResult.getHypothesis();
+						LOGGER.debug("You said: [" + speech + "]\n");
+						processSpeech(speech);
 
-			
+						speech = null;
+						speechResult = null;
+						//	scheduler.wait(3000);
+
+					} else
+						LOGGER.debug("INFO", "I can't understand what you said.\n");
+
+
+				}
 			}
-			
 			if(speechThreadShouldEnd){
+				if(recognizer!=null)
 				recognizer.stopRecognition();
 			
 				speechThreadshouldStart = false;
@@ -677,6 +549,7 @@ public final class Controller extends AbstractIOLITEApp {
 		} catch (Exception ex) {
 			LOGGER.debug("WARNING", null, ex);
 			try{
+				if(recognizer!=null)
 				recognizer.stopRecognition();
 			}
 			catch(Exception e){
