@@ -320,8 +320,9 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 
 		LOGGER.debug("Started");
-		speechThreadshouldStart = true;
-		executeVoiceCommand();
+		detectMovement();
+		speechThreadshouldStart = false;
+	//	executeVoiceCommand();
 	}
 
 	/**
@@ -478,7 +479,67 @@ public final class Controller extends AbstractIOLITEApp {
 			throw new InitializeFailedException("Loading templates for the dummy app failed", e);
 		}
 	}
+	
+	private void detectMovement(){
+		
+LOGGER.info("es läuft");
+		
+		this.deviceAPI.setObserver(new DeviceAddAndRemoveLogger());
 
+		List <Device> deviceList = deviceAPI.getDevices();
+		for (Device device: deviceList){
+			if(device.getProfileIdentifier().equals("http://iolite.de#MovementSensor")){
+				DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
+				if(onProperty!=null){
+					
+					
+					onProperty.setObserver(new DeviceOnOffStatusLogger(device.getIdentifier()));
+					onProperty.setObserver(new DeviceBooleanPropertyObserver() {
+						
+						@Override
+						public void valueChanged(Boolean arg0) {
+							LOGGER.info("Movement detected");							
+							for (Device light :deviceList){
+								if(light.getProfileIdentifier().equals("http://iolite.de#Lamp")){
+									final DeviceBooleanProperty onPropertylight = light.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+									
+									if (onPropertylight.getValue() == false && onProperty.getValue()==true) {
+										try {
+											onPropertylight.requestValueUpdate(true);
+											LOGGER.info("LICHT ANGESCHALTET");
+										} catch (DeviceAPIException e) {
+											e.printStackTrace();
+										}
+									
+									
+									
+								}
+								}
+								
+							
+							}
+							
+						}
+						
+						@Override
+						public void keyChanged(String arg0) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public void deviceChanged(Device arg0) {
+							// TODO Auto-generated method stub
+							
+						}
+					});
+					
+				}
+				
+				}
+			
+		}
+	}
 	private void executeVoiceCommand() {
 
 		LOGGER.debug("INFO", "Loading..\n");
