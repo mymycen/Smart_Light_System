@@ -13,7 +13,6 @@ import de.iolite.app.AbstractIOLITEApp;
 import de.iolite.app.api.device.DeviceAPIException;
 import de.iolite.app.api.device.access.Device;
 import de.iolite.app.api.device.access.DeviceAPI;
-import de.iolite.app.api.device.access.DeviceAPI.DeviceAPIObserver;
 import de.iolite.app.api.device.access.DeviceBooleanProperty;
 import de.iolite.app.api.device.access.DeviceBooleanProperty.DeviceBooleanPropertyObserver;
 import de.iolite.app.api.device.access.DeviceDoubleProperty;
@@ -26,6 +25,7 @@ import de.iolite.app.api.frontend.util.FrontendAPIUtility;
 import de.iolite.app.api.storage.StorageAPI;
 import de.iolite.app.api.storage.StorageAPIException;
 import de.iolite.app.api.user.access.UserAPI;
+import de.iolite.apps.smart_light.RequestHandlers.setPropertyRequestHandler;
 import de.iolite.apps.smart_light.internals.PageWithEmbeddedSessionTokenRequestHandler;
 import de.iolite.common.lifecycle.exception.CleanUpFailedException;
 import de.iolite.common.lifecycle.exception.InitializeFailedException;
@@ -43,7 +43,6 @@ import de.iolite.utilities.time.series.TimeInterval;
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.LiveSpeechRecognizer;
 import edu.cmu.sphinx.api.SpeechResult;
-import org.apache.commons.lang3.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -124,49 +123,6 @@ public final class Controller extends AbstractIOLITEApp {
 					IOLITEHTTPResponse.JSON_CONTENT_TYPE);
 		}
 	}
-/*
-	private static final class DeviceAddAndRemoveLogger implements DeviceAPIObserver {
-
-		@Override
-		public void addedToDevices(final Device device) {
-			LOGGER.debug("a new device added '{}'", device.getIdentifier());
-		}
-
-		@Override
-		public void removedFromDevices(final Device device) {
-			LOGGER.debug("a device removed '{}'", device.getIdentifier());
-		}
-	}
-
-	private static final class DeviceOnOffStatusLogger implements DeviceBooleanPropertyObserver {
-
-		@Nonnull
-		private final String identifier;
-
-		private DeviceOnOffStatusLogger(final String deviceIdentifier) {
-			this.identifier = Validate.notNull(deviceIdentifier, "'deviceIdentifier' must not be null");
-		}
-
-		@Override
-		public void deviceChanged(final Device element) {
-			// nothing here
-		}
-
-		@Override
-		public void keyChanged(final String key) {
-			// nothing here
-		}
-
-		@Override
-		public void valueChanged(final Boolean value) {
-			if (value) {
-				LOGGER.debug("device '{}' turned on", this.identifier);
-			} else {
-				LOGGER.debug("device '{}' turned off", this.identifier);
-			}
-		}
-	}
-*/
 
 	/**
 	 * A response handler returning devices filtered by the property type.
@@ -296,7 +252,6 @@ public final class Controller extends AbstractIOLITEApp {
 
 			// Frontend API enables the App to expose a user interface
 			this.frontendAPI = context.getAPI(FrontendAPI.class);
-			initializeWebResources();
 
 			// Device API gives access to devices connected to IOLITE
 			deviceAPI = context.getAPI(DeviceAPI.class);
@@ -310,6 +265,7 @@ public final class Controller extends AbstractIOLITEApp {
 			for (final PlaceSchedule placeSchedule : this.heatingAPI.getHeatingSchedulesOfPlaces()) {
 				LOGGER.debug("Heating schedule found for place '{}'", placeSchedule.getPlaceIdentifier());
 			}
+			initializeWebResources();
 			
 		} catch (final IOLITEAPINotResolvableException e) {
 			throw new StartFailedException(
@@ -470,6 +426,7 @@ public final class Controller extends AbstractIOLITEApp {
 		// example JSON request handlers
 		this.frontendAPI.registerRequestHandler("rooms", new RoomsResponseHandler());
 		this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler());
+		this.frontendAPI.registerRequestHandler("setValue", new setPropertyRequestHandler(LOGGER,deviceAPI,environmentAPI));
 
 		this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());
 	}
@@ -484,96 +441,7 @@ public final class Controller extends AbstractIOLITEApp {
 			throw new InitializeFailedException("Loading templates for the dummy app failed", e);
 		}
 	}
-	
-	/*
-	private void detectMovement(){
-		
-		LOGGER.info("es l�uft");
-		
-		this.deviceAPI.setObserver(dLogger.new DeviceAddAndRemoveLogger());
 
-		List <Device> deviceList = deviceAPI.getDevices();
-		for (Device device: deviceList){
-			if(device.getProfileIdentifier().equals("http://iolite.de#MovementSensor")){
-				DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
-				if(onProperty!=null){
-					
-					
-					onProperty.setObserver(dLogger.new DeviceOnOffStatusLogger(device.getIdentifier()));
-					onProperty.setObserver(new DeviceBooleanPropertyObserver() {
-						
-						@Override
-						public void valueChanged(Boolean arg0) {
-							LOGGER.info("Movement detected");
-							Location currentRoom = null;
-							List<Location> roomlist = environmentAPI.getLocations();
-							for(Location location : roomlist){
-								
-								for (de.iolite.app.api.environment.Device roomDevice :location.getDevices()){
-									
-									for(Device deviceControl: deviceList){
-									if (deviceControl.getProfileIdentifier().equals(("http://iolite.de#MovementSensor"))&&deviceControl.getIdentifier().equals(roomDevice.getIdentifier())){
-										
-										
-									final DeviceBooleanProperty onPropertyMove = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
-										if (onPropertyMove.getValue()){
-									
-									
-
-											for(Device deviceControl2: deviceList){
-		
-										for(de.iolite.app.api.environment.Device lightdevices : location.getDevices()){
-										
-											if(deviceControl2.getProfileIdentifier().equals("http://iolite.de#Lamp")&&deviceControl2.getIdentifier().equals(lightdevices.getIdentifier())){
-												final DeviceBooleanProperty onPropertylight = deviceControl2.getBooleanProperty((DriverConstants.PROPERTY_on_ID));
-												
-												
-												if (onPropertylight.getValue() == false && onPropertyMove.getValue()==true) {
-											try {
-												onPropertylight.requestValueUpdate(true);
-												LOGGER.info("Light is on in the " + location.getName());
-												
-											} catch (DeviceAPIException e) {
-												e.printStackTrace();
-											}
-										
-										}
-										
-									}
-									}
-									}
-									}
-									}
-								}
-								}
-								
-				
-								
-							}
-															
-							
-						}
-						
-						@Override
-						public void keyChanged(String arg0) {
-							// TODO Auto-generated method stub
-							
-						}
-						
-						@Override
-						public void deviceChanged(Device arg0) {
-							// TODO Auto-generated method stub
-							
-						}
-					});
-					
-				}
-				
-				}
-			
-		}
-	}
-	*/
 	private void executeVoiceCommand() {
 
 		LOGGER.debug("INFO", "Loading..\n");
