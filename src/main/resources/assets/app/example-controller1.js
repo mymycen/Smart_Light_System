@@ -27,5 +27,15 @@
     	}, function onFailure(response) {
     		console.error("can't get devices");
     	});
+
+		$scope.turnValue = function (deviceID) {
+			$http.post('setValue', {'deviceType' : deviceID }).then(function onSuccess(response) {
+				console.debug("fetchig devices was successfull");
+				console.debug(response.data);
+				$scope.value = response.data.value;
+			}, function onFailure(response) {
+				console.error("can't get devices");
+			});
+		};
      } ]);
 })();

@@ -1,15 +1,16 @@
 <div class="example-container" >
-	<h3>Requesting paths registered with FrontendAPI</h3>
 	<div class="example-row" ng-controller="ExampleController1">
 		
 		<div class="example-title">Rooms</div>
 		<div class="example-responsive-content" ng-repeat="room in rooms">
 			<span ng-bind="room"></span>
 		</div>
-		
+
 		<div class="example-title">Devices with ON/OFF property</div>
 		<div class="example-responsive-content" ng-repeat="device in devices">
 			<span ng-bind="device.name"></span>
+			<span ng-bind="device.identifier"></span>
+			<button class="btn btn-primary btn-large" ng-click="turnValue(device.identifier)">Change Light</button>
 		</div>
 	</div>
 	
