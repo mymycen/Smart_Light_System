@@ -14,7 +14,6 @@ import de.iolite.app.api.device.DeviceAPIException;
 import de.iolite.app.api.device.access.Device;
 import de.iolite.app.api.device.access.DeviceAPI;
 import de.iolite.app.api.device.access.DeviceBooleanProperty;
-import de.iolite.app.api.device.access.DeviceBooleanProperty.DeviceBooleanPropertyObserver;
 import de.iolite.app.api.device.access.DeviceDoubleProperty;
 import de.iolite.app.api.environment.EnvironmentAPI;
 import de.iolite.app.api.environment.Location;
@@ -25,7 +24,10 @@ import de.iolite.app.api.frontend.util.FrontendAPIUtility;
 import de.iolite.app.api.storage.StorageAPI;
 import de.iolite.app.api.storage.StorageAPIException;
 import de.iolite.app.api.user.access.UserAPI;
+import de.iolite.apps.smart_light.RequestHandlers.DevicesResponseHandler;
+import de.iolite.apps.smart_light.RequestHandlers.RoomsResponseHandler;
 import de.iolite.apps.smart_light.RequestHandlers.setPropertyRequestHandler;
+import de.iolite.apps.smart_light.RequestHandlers.voiceCommandRequestHandler;
 import de.iolite.apps.smart_light.internals.PageWithEmbeddedSessionTokenRequestHandler;
 import de.iolite.common.lifecycle.exception.CleanUpFailedException;
 import de.iolite.common.lifecycle.exception.InitializeFailedException;
@@ -34,25 +36,18 @@ import de.iolite.common.lifecycle.exception.StopFailedException;
 import de.iolite.common.requesthandler.*;
 import de.iolite.common.requesthandler.StaticResources.PathHandlerPair;
 import de.iolite.drivers.basic.DriverConstants;
-import de.iolite.utilities.concurrency.scheduler.Scheduler;
 import de.iolite.utilities.disposeable.Disposeable;
 import de.iolite.utilities.time.series.DataEntries.AggregatedEntry;
 import de.iolite.utilities.time.series.DataEntries.BooleanEntry;
 import de.iolite.utilities.time.series.Function;
 import de.iolite.utilities.time.series.TimeInterval;
-import edu.cmu.sphinx.api.Configuration;
-import edu.cmu.sphinx.api.LiveSpeechRecognizer;
-import edu.cmu.sphinx.api.SpeechResult;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -70,10 +65,6 @@ import java.util.concurrent.TimeUnit;
  * @since 1.0
  */
 public final class Controller extends AbstractIOLITEApp {
-	public Controller() {
-		// empty
-		
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
 
@@ -88,28 +79,19 @@ public final class Controller extends AbstractIOLITEApp {
 
 	/** front end assets */
 	private Disposeable disposeableAssets;
-
-	/**
-	 * <code>ExampleApp</code> constructor. An IOLITE App must have a public,
-	 * parameter-less constructor.
-	 */
-	
-	private Scheduler scheduler;
-	private LiveSpeechRecognizer recognizer;
-	private static boolean started = false;
-	static boolean stopped = true;
-	private String speech;
-	protected static List<Location> rooms;
-	private static String currentLocation = "root";
-	boolean speechThreadshouldStart = false;
-	boolean speechThreadShouldEnd = false;
 	DeviceLogger dLogger = new DeviceLogger(LOGGER);
 	Movement movement = new Movement();
-
+	protected static List<Location> rooms;
+	private processHttp processHttp = new processHttp();
 
 	public enum Context {
 		WELCOME, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, CHANGE_LIGHT_COLOR, DONT_UNDERSTAND, ROOM_NOT_EXIST
 	};
+
+	public Controller() {
+		// Has to be empty
+
+	}
 
 	private static final class DeviceJSONRequestHandler extends FrontendAPIRequestHandler {
 
@@ -124,58 +106,7 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 	}
 
-	/**
-	 * A response handler returning devices filtered by the property type.
-	 */
-	class DevicesResponseHandler extends FrontendAPIRequestHandler {
 
-		@Override
-		protected IOLITEHTTPResponse handleRequest(final IOLITEHTTPRequest request, final String subPath) {
-			String propertyType;
-			try {
-				propertyType = new JSONObject(readPassedData(request)).getString("propertyType");
-			} catch (final JSONException e) {
-				LOGGER.error("Could not handle devices request due to a JSON error: {}", e.getMessage(), e);
-				return new IOLITEHTTPStaticResponse(e.getMessage(), HTTPStatus.BadRequest, "text/plain");
-			} catch (final IOException e) {
-				LOGGER.error("Could not handle devices request due to an I/O error: {}", e.getMessage(), e);
-				return new IOLITEHTTPStaticResponse(e.getMessage(), HTTPStatus.BadRequest, "text/plain");
-			}
-
-			final JSONArray jsonDeviceArray = new JSONArray();
-			for (final Device device : deviceAPI.getDevices()) {
-				if (device.getProperty(propertyType) != null) {
-					// device has the correct property type
-					final JSONObject jsonDeviceObject = new JSONObject();
-					jsonDeviceObject.put("name", device.getName());
-					jsonDeviceObject.put("identifier", device.getIdentifier());
-					jsonDeviceArray.put(jsonDeviceObject);
-				}
-			}
-
-			final JSONObject response = new JSONObject();
-			response.put("devices", jsonDeviceArray);
-			return new IOLITEHTTPStaticResponse(response.toString(), IOLITEHTTPResponse.JSON_CONTENT_TYPE);
-		}
-
-		private String getCharset(final IOLITEHTTPRequest request) {
-			final String charset = request.getCharset();
-			return charset == null || charset.length() == 0 ? IOLITEHTTPStaticResponse.ENCODING_UTF8 : charset;
-		}
-
-		private String readPassedData(final IOLITEHTTPRequest request) throws IOException {
-			final String charset = getCharset(request);
-			try (BufferedReader bufferedReader = new BufferedReader(
-					new InputStreamReader(request.getContent(), charset))) {
-				final StringBuilder stringBuilder = new StringBuilder();
-				String line;
-				while ((line = bufferedReader.readLine()) != null) {
-					stringBuilder.append(line);
-				}
-				return stringBuilder.toString();
-			}
-		}
-	}
 
 	/**
 	 * A response handler for returning the "not found" response.
@@ -188,35 +119,15 @@ public final class Controller extends AbstractIOLITEApp {
 		}
 	}
 
-	/**
-	 * A response handler returning all rooms as JSON array.
-	 */
-	class RoomsResponseHandler extends FrontendAPIRequestHandler {
 
-		@Override
-		protected IOLITEHTTPResponse handleRequest(final IOLITEHTTPRequest request, final String subPath) {
-			final JSONArray locationNames = new JSONArray();
-			for (final Location location : environmentAPI.getLocations()) {
-				locationNames.put(location.getName());
-			}
-			final JSONObject response = new JSONObject();
-			response.put("rooms", locationNames);
-			return new IOLITEHTTPStaticResponse(response.toString(), IOLITEHTTPResponse.JSON_CONTENT_TYPE);
-		}
-	}
-
-	
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected void cleanUpHook() throws CleanUpFailedException {
-		speechThreadShouldEnd=true;
 		LOGGER.debug("Cleaning");
 		LOGGER.debug("Cleaned");
-		
-		
 	}
 
 	/**
@@ -282,8 +193,8 @@ public final class Controller extends AbstractIOLITEApp {
 
 		LOGGER.debug("Started");
 		movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
-		speechThreadshouldStart = false;
-	//	executeVoiceCommand();
+/*		speechThreadshouldStart = true;
+		executeVoiceCommand();*/
 	}
 
 	/**
@@ -292,10 +203,6 @@ public final class Controller extends AbstractIOLITEApp {
 	@Override
 	protected void stopHook() throws StopFailedException {
 		LOGGER.debug("Stopping");
-		speechThreadShouldEnd = true;
-		if(recognizer!=null)
-		recognizer.stopRecognition();
-
 		// deregister the static assets
 		if (this.disposeableAssets != null) {
 			this.disposeableAssets.dispose();
@@ -424,9 +331,10 @@ public final class Controller extends AbstractIOLITEApp {
 		this.frontendAPI.registerDefaultRequestHandler(new NotFoundResponseHandler());
 
 		// example JSON request handlers
-		this.frontendAPI.registerRequestHandler("rooms", new RoomsResponseHandler());
-		this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler());
+		this.frontendAPI.registerRequestHandler("rooms", new RoomsResponseHandler(environmentAPI));
+		this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler(LOGGER,deviceAPI));
 		this.frontendAPI.registerRequestHandler("setValue", new setPropertyRequestHandler(LOGGER,deviceAPI,environmentAPI));
+		this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER,deviceAPI,environmentAPI));
 
 		this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());
 	}
@@ -440,93 +348,6 @@ public final class Controller extends AbstractIOLITEApp {
 		} catch (final IOException e) {
 			throw new InitializeFailedException("Loading templates for the dummy app failed", e);
 		}
-	}
-
-	private void executeVoiceCommand() {
-
-		LOGGER.debug("INFO", "Loading..\n");
-		//this.scheduler = context.getScheduler();
-
-		// Configuration
-		Configuration configuration = new Configuration();
-
-		// Load model from the jar
-		configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
-		configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
-
-		// if you want to use LanguageModelPath disable the 3 lines after which
-		// are setting a custom grammar->
-
-		// configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
-
-		// Grammar
-	      configuration.setGrammarPath("resource:/assets/grammars");
-		  configuration.setGrammarName("grammar");
-		  configuration.setUseGrammar(true);
-
-		try {
-			recognizer = new LiveSpeechRecognizer(configuration);
-			recognizer.startRecognition(true);
-		} catch (Exception ex) {
-			LOGGER.debug("PROBLEM" + ex.getMessage());
-		}
-
-		// Start the Thread
-//		scheduler.execute(startSpeechThread());
-		try {
-			
-			LOGGER.debug("You can start to speak...\n");
-
-			while (speechThreadshouldStart) {
-				/*
-				 * This method will return when the end of speech is
-				 * reached.
-				 */
-				if (recognizer != null) {
-					SpeechResult speechResult = recognizer.getResult();
-
-
-					if (speechResult != null) {
-
-						speech = speechResult.getHypothesis();
-						LOGGER.debug("You said: [" + speech + "]\n");
-						processSpeech(speech);
-
-						speech = null;
-						speechResult = null;
-						//	scheduler.wait(3000);
-
-					} else
-						LOGGER.debug("INFO", "I can't understand what you said.\n");
-
-
-				}
-			}
-			if(speechThreadShouldEnd){
-				if(recognizer!=null)
-				recognizer.stopRecognition();
-			
-				speechThreadshouldStart = false;
-			}
-			
-		} catch (Exception ex) {
-			LOGGER.debug("WARNING", null, ex);
-			try{
-				if(recognizer!=null)
-				recognizer.stopRecognition();
-			}
-			catch(Exception e){
-				LOGGER.debug("ERROR",e.getMessage().toString());
-			}
-          
-		}
-
-	
-		
-		
-	
-		
-
 	}
 
 //	protected Runnable startSpeechThread() {
@@ -585,285 +406,5 @@ public final class Controller extends AbstractIOLITEApp {
 //		return new speechThread();
 //
 //	}
-
-	private static PlaySound playSound = new PlaySound();
-	static boolean isLightTurnedon = false;
-	static boolean isLightTurnedoff = false;
-
-	public static void processSpeech(String result) throws DeviceAPIException, InterruptedException {
-
-		if (result != null && result.toLowerCase().contains("hello")) {
-			started = true;
-			stopped = false;
-			playSound.playMp3(Context.WELCOME.toString());
-			Thread.sleep(3000);
-		}
-
-		else if (result != null && result.toLowerCase().contains("stop")) {
-			stopped = true;
-			started = false;
-
-		}
-
-		else if (result != null && started == true && result.toLowerCase().contains("living room")) {
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(Context.TO_LIVINGROOM.toString());
-					Thread.sleep(3000);
-				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
-			}
-
-			
-			
-
-		}
-
-		else if (result != null && started == true && result.toLowerCase().contains("bedroom")) {
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(Context.TO_BEDROOM.toString());
-					Thread.sleep(3000);
-				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
-			}
-			
-
-		} else if (result != null && started == true && result.toLowerCase().contains("kitchen")) {
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(Context.TO_KITCHEN.toString());
-					Thread.sleep(3000);
-				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
-			}
-			
-
-		} else if (result != null && started == true && result.toLowerCase().contains("office")) {
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(Context.TO_OFFICE.toString());
-					Thread.sleep(3000);
-				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
-
-			}
-			
-
-		} else if (result != null && started == true && result.toLowerCase().contains("light")
-				&& result.toLowerCase().contains("on")) {
-
-			for (Location location : rooms) {
-				if (location.getName().equals(currentLocation)) {
-					List<de.iolite.app.api.environment.Device> devices = location.getDevices();
-
-					for (de.iolite.app.api.environment.Device device : devices) {
-						String deviceIdentifier = device.getIdentifier();
-						for (Device deviceControl : deviceAPI.getDevices()) {
-							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
-								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-									final DeviceBooleanProperty onProperty = deviceControl
-											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									if (onProperty.getValue() == false) {
-										onProperty.requestValueUpdate(true);
-										onProperty.setObserver(new DeviceBooleanPropertyObserver() {
-
-											@Override
-											public void valueChanged(Boolean arg0) {
-												// TODO Auto-generated method
-												// stub
-												isLightTurnedon = true;
-
-											}
-
-											@Override
-											public void keyChanged(String arg0) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-
-											@Override
-											public void deviceChanged(Device arg0) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-										});
-
-									}
-								}
-							}
-						}
-					}
-
-				}
-
-				
-			}
-
-			if (currentLocation.equals("root")) {
-
-				for (Device deviceControl : deviceAPI.getDevices()) {
-
-					if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-						final DeviceBooleanProperty onProperty = deviceControl
-								.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-						if (onProperty.getValue() == false) {
-							onProperty.requestValueUpdate(true);
-							onProperty.setObserver(new DeviceBooleanPropertyObserver() {
-
-								@Override
-								public void valueChanged(Boolean arg0) {
-									// TODO Auto-generated method stub
-									isLightTurnedon = true;
-
-								}
-
-								@Override
-								public void keyChanged(String arg0) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void deviceChanged(Device arg0) {
-									// TODO Auto-generated method stub
-
-								}
-							});
-
-						}
-					}
-				}
-				
-			}
-			if (isLightTurnedon = true) {
-				playSound.playMp3(Context.TURN_LIGHT_ON.toString());
-				Thread.sleep(3000);
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("light")
-				&& result.toLowerCase().contains("off")) {
-			for (Location location : rooms) {
-				if (location.getName().equals(currentLocation)) {
-					List<de.iolite.app.api.environment.Device> devices = location.getDevices();
-
-					for (de.iolite.app.api.environment.Device device : devices) {
-						String deviceIdentifier = device.getIdentifier();
-						for (Device deviceControl : deviceAPI.getDevices()) {
-							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
-								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-									final DeviceBooleanProperty onProperty = deviceControl
-											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									if (onProperty.getValue() == true) {
-										onProperty.requestValueUpdate(false);
-										onProperty.setObserver(new DeviceBooleanPropertyObserver() {
-
-											@Override
-											public void valueChanged(Boolean arg0) {
-												// TODO Auto-generated method
-												// stub
-												isLightTurnedoff = true;
-
-											}
-
-											@Override
-											public void keyChanged(String arg0) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-
-											@Override
-											public void deviceChanged(Device arg0) {
-												// TODO Auto-generated method
-												// stub
-
-											}
-										});
-
-									}
-								}
-							}
-						}
-					}
-
-				}
-
-				
-			}
-
-			if (currentLocation.equals("root")) {
-
-				for (Device deviceControl : deviceAPI.getDevices()) {
-
-					if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-						final DeviceBooleanProperty onProperty = deviceControl
-								.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-						if (onProperty.getValue() == true) {
-							onProperty.requestValueUpdate(false);
-							onProperty.setObserver(new DeviceBooleanPropertyObserver() {
-
-								@Override
-								public void valueChanged(Boolean arg0) {
-									// TODO Auto-generated method stub
-									isLightTurnedoff = true;
-
-								}
-
-								@Override
-								public void keyChanged(String arg0) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void deviceChanged(Device arg0) {
-									// TODO Auto-generated method stub
-
-								}
-							});
-
-						}
-					}
-				}
-				
-			}
-			if (isLightTurnedoff = true) {
-				playSound.playMp3(Context.TURN_LIGHT_OFF.toString());
-				Thread.sleep(3000);
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("change")
-				&& result.toLowerCase().contains("light") && result.toLowerCase().contains("color")) {
-
-			playSound.playMp3(Context.CHANGE_LIGHT_COLOR.toString());
-
-		} else if (result != null && started == true) {
-			playSound.playMp3(Context.DONT_UNDERSTAND.toString());
-			Thread.sleep(3000);
-		}
-	}
 
 }
