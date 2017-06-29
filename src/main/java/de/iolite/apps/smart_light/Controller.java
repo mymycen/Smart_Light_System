@@ -57,12 +57,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <code>ExampleApp</code> is an example IOLITE App.
  *
- * @author Grzegorz Lehmann
- * @author Erdene-Ochir Tuguldur
- * @author Felix Rodemund
- * @since 1.0
+ *
  */
 public final class Controller extends AbstractIOLITEApp {
 
@@ -76,6 +72,16 @@ public final class Controller extends AbstractIOLITEApp {
 	private UserAPI userAPI;
 
 	private HeatingAPI heatingAPI;
+	public static LightMode romaticMode = new LightMode(50, 344.0, 95.0);
+	public static LightMode partyMode1 = new LightMode(100, 2.0, 100.0);
+	public static LightMode partyMode2 = new LightMode(60, 274.0, 100.0);
+	public static LightMode partyMode3 = new LightMode(30, 96.0, 100.0);
+	public static LightMode partyMode4 = new LightMode(10, 240.0, 100.0);
+
+
+	public static LightMode sleepingMode = new LightMode(10, 2.0, 100.0);
+	public static LightMode movieMode = new LightMode(30, 275, 57);
+	public static LightMode studyingMode = new LightMode(100, 360.0, 100.0);
 
 	/** front end assets */
 	private Disposeable disposeableAssets;
@@ -84,10 +90,7 @@ public final class Controller extends AbstractIOLITEApp {
 	protected static List<Location> rooms;
 	private processHttp processHttp = new processHttp();
 
-	public enum Context {
-		WELCOME, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, CHANGE_LIGHT_COLOR, DONT_UNDERSTAND, ROOM_NOT_EXIST
-	};
-
+	
 	public Controller() {
 		// Has to be empty
 

@@ -1,6 +1,7 @@
 package de.iolite.apps.smart_light;
 
 import java.io.BufferedInputStream;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,10 +18,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 public class PlaySound implements LineListener{
 
-	private String lightTurnedoff = "lightTurnedoff";
-	private String lightTurnedon = "lightTurnedon";
-	private static String welcome_audio = "/sounds/welcome.WAV";
+	
+	private static String ready_audio = "/sounds/ready.WAV";
 	private static String livingroom_audio = "/sounds/livingroom.WAV";
+	private static String root_audio = "/sounds/root.WAV";
 	private static String bedroom_audio = "/sounds/bedroom.WAV";
 	private static String kitchen_audio = "/sounds/kitchen.WAV";
 	private static String office_audio = "/sounds/office.WAV";
@@ -28,7 +29,13 @@ public class PlaySound implements LineListener{
 	private static String lightoff_audio = "/sounds/lightoff.WAV";
 	private static String lightcolorchanged_audio = "/sounds/lightcolorchanged.WAV";
 	private static String dontunderstand_audio = "/sounds/dontunderstand.WAV";
-	private static String roomnotexist_audio = "/sounds/roomnotexist.WAV";
+	private static String romantic_audio = "/sounds/romantic.WAV";
+	private static String party_audio = "/sounds/party.WAV";
+	private static String movie_audio = "/sounds/movie.WAV";
+	private static String study_audio = "/sounds/study.WAV";
+	private static String sleep_audio = "/sounds/sleep.WAV";
+
+
 	boolean playCompleted;
 	Clip clip;
 
@@ -41,9 +48,9 @@ public class PlaySound implements LineListener{
 		String filePath = "";
 		switch (context) {
 
-		case "WELCOME":
+		case "READY":
 
-			filePath = welcome_audio;
+			filePath = ready_audio;
 
 			break;
   
@@ -51,6 +58,11 @@ public class PlaySound implements LineListener{
 			filePath = livingroom_audio;
 
 			break;
+		case "TO_ROOT":
+			filePath = root_audio;
+
+			break;
+
 
 		case "TO_KITCHEN":
 			filePath = kitchen_audio;
@@ -79,8 +91,21 @@ public class PlaySound implements LineListener{
 		case "DONT_UNDERSTAND":
 			filePath = dontunderstand_audio;
 			break;
-		case "ROOM_NOT_EXIST":
-			filePath = roomnotexist_audio;
+		case "ROMANTIC":
+			filePath = romantic_audio;
+			break;
+		case "PARTY":
+			filePath = party_audio;
+			break;
+		case "SLEEPING":
+			filePath = sleep_audio;
+			break;
+		case "MOVIE":
+			filePath = movie_audio;
+			break;
+		case "STUDYING":
+			filePath = study_audio;
+			
 
 		}
 
