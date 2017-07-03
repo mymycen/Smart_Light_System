@@ -6,4 +6,4 @@
 
 grammar grammar;
 
-public <syntax>  = (  alice| bedroom| living room| kitchen| office| light on | light off| romantic| stop| to root| party| sleeping| studying| movie);
+public <syntax>  = (  alice| bedroom| living room| kitchen| office| light on | light off| romantic| stop| to root| party| sleeping| working| movie);
