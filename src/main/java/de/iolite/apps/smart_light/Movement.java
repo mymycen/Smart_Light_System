@@ -107,8 +107,8 @@ public void detectMovement(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI en
 												
 												if (onPropertylight.getValue() == false && onPropertyMove.getValue()==true) {
 											try {
-												onPropertylight.requestValueUpdate(true);
 												LOGGER.info("Light is on in the " + location.getName());
+												onPropertylight.requestValueUpdate(true);
 												
 											} catch (DeviceAPIException e) {
 												e.printStackTrace();

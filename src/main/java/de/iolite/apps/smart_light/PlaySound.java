@@ -29,6 +29,7 @@ public class PlaySound implements LineListener{
 	private static String lightcolorchanged_audio = "/sounds/lightcolorchanged.WAV";
 	private static String dontunderstand_audio = "/sounds/dontunderstand.WAV";
 	private static String roomnotexist_audio = "/sounds/roomnotexist.WAV";
+	private static String romantic_audio = "/sounds/romantic.wav";
 	boolean playCompleted;
 	Clip clip;
 
@@ -81,6 +82,10 @@ public class PlaySound implements LineListener{
 			break;
 		case "ROOM_NOT_EXIST":
 			filePath = roomnotexist_audio;
+			break;
+		case "ROMANTIC":
+            filePath = romantic_audio;
+            break;
 
 		}
 

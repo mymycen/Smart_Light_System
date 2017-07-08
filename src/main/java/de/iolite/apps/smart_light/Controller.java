@@ -17,6 +17,8 @@ import de.iolite.app.api.device.access.DeviceAPI.DeviceAPIObserver;
 import de.iolite.app.api.device.access.DeviceBooleanProperty;
 import de.iolite.app.api.device.access.DeviceBooleanProperty.DeviceBooleanPropertyObserver;
 import de.iolite.app.api.device.access.DeviceDoubleProperty;
+import de.iolite.app.api.device.access.DeviceIntegerProperty;
+import de.iolite.app.api.device.access.DeviceIntegerProperty.DeviceIntegerPropertyObserver;
 import de.iolite.app.api.environment.EnvironmentAPI;
 import de.iolite.app.api.environment.Location;
 import de.iolite.app.api.frontend.FrontendAPI;
@@ -109,7 +111,7 @@ public final class Controller extends AbstractIOLITEApp {
 
 
 	public enum Context {
-		WELCOME, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, CHANGE_LIGHT_COLOR, DONT_UNDERSTAND, ROOM_NOT_EXIST
+		WELCOME, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, CHANGE_LIGHT_COLOR, DONT_UNDERSTAND, ROOM_NOT_EXIST, ROMANTIC
 	};
 
 	private static final class DeviceJSONRequestHandler extends FrontendAPIRequestHandler {
@@ -326,8 +328,8 @@ public final class Controller extends AbstractIOLITEApp {
 
 		LOGGER.debug("Started");
 		movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
-		speechThreadshouldStart = false;
-	//	executeVoiceCommand();
+		speechThreadshouldStart = true;
+		executeVoiceCommand();
 	}
 
 	/**
@@ -721,7 +723,7 @@ public final class Controller extends AbstractIOLITEApp {
 	private static PlaySound playSound = new PlaySound();
 	static boolean isLightTurnedon = false;
 	static boolean isLightTurnedoff = false;
-
+    static boolean lightmodechanged = false;
 	public static void processSpeech(String result) throws DeviceAPIException, InterruptedException {
 
 		if (result != null && result.toLowerCase().contains("hello")) {
@@ -744,9 +746,9 @@ public final class Controller extends AbstractIOLITEApp {
 					playSound.playMp3(Context.TO_LIVINGROOM.toString());
 					Thread.sleep(3000);
 				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
+//				else{
+//					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
+//				}
 			}
 
 			
@@ -761,9 +763,9 @@ public final class Controller extends AbstractIOLITEApp {
 					playSound.playMp3(Context.TO_BEDROOM.toString());
 					Thread.sleep(3000);
 				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
+//				else{
+//					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
+//				}
 			}
 			
 
@@ -774,9 +776,9 @@ public final class Controller extends AbstractIOLITEApp {
 					playSound.playMp3(Context.TO_KITCHEN.toString());
 					Thread.sleep(3000);
 				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
+//				else{
+//					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
+//				}
 			}
 			
 
@@ -787,9 +789,9 @@ public final class Controller extends AbstractIOLITEApp {
 					playSound.playMp3(Context.TO_OFFICE.toString());
 					Thread.sleep(3000);
 				}
-				else{
-					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
-				}
+//				else{
+//					playSound.playMp3(Context.ROOM_NOT_EXIST.toString());
+//				}
 
 			}
 			
@@ -987,12 +989,108 @@ public final class Controller extends AbstractIOLITEApp {
 				Thread.sleep(3000);
 			}
 
-		} else if (result != null && started == true && result.toLowerCase().contains("change")
-				&& result.toLowerCase().contains("light") && result.toLowerCase().contains("color")) {
+		} else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
 
-			playSound.playMp3(Context.CHANGE_LIGHT_COLOR.toString());
+            for (Location location : rooms) {
+                if (location.getName().equals(currentLocation)) {
+                    List<de.iolite.app.api.environment.Device> devices = location.getDevices();
 
-		} else if (result != null && started == true) {
+                    for (de.iolite.app.api.environment.Device device : devices) {
+                        String deviceIdentifier = device.getIdentifier();
+                        for (Device deviceControl : deviceAPI.getDevices()) {
+                            if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
+                                if (deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+//                                    final DeviceBooleanProperty onProperty = deviceControl
+//                                            .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                                    final DeviceIntegerProperty dimmingLevel = deviceControl.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+                                    
+                                        dimmingLevel.requestValueUpdate(20);
+                                        
+                                    final DeviceDoubleProperty hue = deviceControl.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_hue_ID);    
+                                        hue.requestValueUpdate(200.0);     
+                                        
+                                    final DeviceDoubleProperty saturation = deviceControl.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_saturation_ID);   
+                                         saturation.requestValueUpdate(200.0);
+                                         dimmingLevel.setObserver(new DeviceIntegerPropertyObserver() {
+                                        
+                                            
+                                            @Override
+                                            public void valueChanged(Integer arg0) {
+                                                // TODO Auto-generated method stub
+                                                lightmodechanged = true;
+                                            }
+                                            
+                                            @Override
+                                            public void keyChanged(String arg0) {
+                                                // TODO Auto-generated method stub
+                                                
+                                            }
+                                            
+                                            @Override
+                                            public void deviceChanged(Device arg0) {
+                                                // TODO Auto-generated method stub
+                                                
+                                            }
+                                        });
+
+                                    
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                
+            }
+
+            if (currentLocation.equals("root")) {
+
+                for (Device deviceControl : deviceAPI.getDevices()) {
+
+                    if (deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+                        
+
+                        final DeviceIntegerProperty dimmingLevel = deviceControl.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+                        
+                        dimmingLevel.requestValueUpdate(77);
+                        
+                    final DeviceDoubleProperty hue = deviceControl.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_hue_ID);    
+                        hue.requestValueUpdate(344.0);     
+                        
+                    final DeviceDoubleProperty saturation = deviceControl.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_saturation_ID);   
+                         saturation.requestValueUpdate(95.0);
+                         dimmingLevel.setObserver(new DeviceIntegerPropertyObserver() {
+                        
+                            
+                            @Override
+                            public void valueChanged(Integer arg0) {
+                                // TODO Auto-generated method stub
+                                lightmodechanged = true;
+                            }
+                            
+                            @Override
+                            public void keyChanged(String arg0) {
+                                // TODO Auto-generated method stub
+                                
+                            }
+                            
+                            @Override
+                            public void deviceChanged(Device arg0) {
+                                // TODO Auto-generated method stub
+                                
+                            }
+                        });
+                        
+                    }
+                }
+                
+            }
+            if (isLightTurnedon = true) {
+                playSound.playMp3(Context.ROMANTIC.toString());
+                Thread.sleep(3000);
+            }
+        } else if (result != null && started == true) {
 			playSound.playMp3(Context.DONT_UNDERSTAND.toString());
 			Thread.sleep(3000);
 		}
