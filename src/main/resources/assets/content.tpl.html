@@ -1,3 +1,78 @@
+<style>
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
+@import url('https://fonts.googleapis.com/css?family=Merriweather:400,700');
+
+body {
+  background-color: white;
+  font-family: "Open Sans", sans-serif;
+  padding: 5px 25px;
+  font-size: 18px;
+  margin: 0;
+  color: #444;
+}
+
+h1 {
+  font-family: "Merriweather", serif;
+  font-size: 32px;
+}
+.mui-switch {
+  width: 52px;
+  height: 31px;
+  position: relative;
+  border: 1px solid #dfdfdf;
+  background-color: #fdfdfd;
+  box-shadow: #dfdfdf 0 0 0 0 inset;
+  border-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  background-clip: content-box;
+  display: inline-block;
+  -webkit-appearance: none;
+  user-select: none;
+  outline: none; }
+.mui-switch:before {
+  content: '';
+  width: 29px;
+  height: 29px;
+  position: absolute;
+  top: 0px;
+  left: 0;
+  border-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); }
+.mui-switch:checked {
+  border-color: #64bd63;
+  box-shadow: #64bd63 0 0 0 16px inset;
+  background-color: #64bd63; }
+.mui-switch:checked:before {
+  left: 21px; }
+.mui-switch.mui-switch-animbg {
+  transition: background-color ease 0.4s; }
+.mui-switch.mui-switch-animbg:before {
+  transition: left 0.3s; }
+.mui-switch.mui-switch-animbg:checked {
+  box-shadow: #dfdfdf 0 0 0 0 inset;
+  background-color: #64bd63;
+  transition: border-color 0.4s, background-color ease 0.4s; }
+.mui-switch.mui-switch-animbg:checked:before {
+  transition: left 0.3s; }
+.mui-switch.mui-switch-anim {
+  transition: border cubic-bezier(0, 0, 0, 1) 0.4s, box-shadow cubic-bezier(0, 0, 0, 1) 0.4s; }
+.mui-switch.mui-switch-anim:before {
+  transition: left 0.3s; }
+.mui-switch.mui-switch-anim:checked {
+  box-shadow: #64bd63 0 0 0 16px inset;
+  background-color: #64bd63;
+  transition: border ease 0.4s, box-shadow ease 0.4s, background-color ease 1.2s; }
+.mui-switch.mui-switch-anim:checked:before {
+  transition: left 0.3s; }
+  </style>
 <div class="example-container" >
 	<div class="example-row" ng-controller="ExampleController1">
 		
@@ -15,6 +90,33 @@
 			<button class="btn btn-primary btn-large" ng-click="turnValue(device.identifier)">Change Light</button>
 		</div>
 	</div>
+	
+	   <table border="5">
+      <tr>
+        <td>Movement Detection</td>
+        <td>  OFF
+     <input class="mui-switch" type="checkbox" checked> ON</td>       
+      </tr>
+      
+      <tr>
+        <td>God Mode</td>
+        <td> OFF
+        <input class="mui-switch" type="checkbox" checked> ON</td>
+     </tr>   
+      <tr>
+        <td>Voice Recognise</td>
+        <td>  OFF
+          <label><input class="mui-switch" type="checkbox" checked> ON</label></td>
+        
+
+
+      </tr>
+      <tr>
+        <td>All Lights</td>
+        <td>  OFF
+          <label><input class="mui-switch" type="checkbox" checked> ON</label></td>
+        </tr>
+          </table>
 	
 	<h3>Using ModelAPI JS interface</h3>
 	<div class="example-row" ng-controller="ExampleController2">
