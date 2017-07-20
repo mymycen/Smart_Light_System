@@ -122,7 +122,7 @@ public class PlaySound implements LineListener{
 			break;
 		case "MIN_BRIGHTNESS":
 			filePath = min_brightness_audio;
-			break;
+			
 
 		}
 
