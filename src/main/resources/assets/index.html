@@ -8,9 +8,10 @@
 
     <title>Angular Example App</title>
 
-	<!-- our style sheet generated from the LESS files -->
-	<link rel="stylesheet" type="text/css" href="css/example-bootstrap.css">
-
+    <!-- our style sheet generated from the LESS files -->
+    <link rel="stylesheet" type="text/css" href="css/example-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="less/bootstrap-colorpicker.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <!-- HTML5 shim must be put in header! -->
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -19,10 +20,11 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-	<!-- all third party dependencies created with Grunt -->
+    <!-- all third party dependencies created with Grunt -->
     <script type="text/javascript" src="lib/third-party.js"></script>
 
-	<!-- wait until Model API is initialized -->
+
+    <!-- wait until Model API is initialized -->
     <script type="text/javascript">
         // wait until bus service is available
         window.name = 'NG_DEFER_BOOTSTRAP!';
@@ -30,8 +32,8 @@
             SID: "{{SID}}",
             throwErrorOnBootFailure: true,
             readyCallback: function () {
-                (function() {
-                    $(document).ready(function() {
+                (function () {
+                    $(document).ready(function () {
                         angular.resumeBootstrap([]);
                     });
                 })();
@@ -39,7 +41,7 @@
         };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/1.1.0/annyang.min.js"></script>
-    
+
     <!-- Model API dependencies -->
     <script type="text/javascript" src="/bus/ModelAPICommunicationObject.js"></script>
     <script type="text/javascript" src="/bus/ModelAPI.js"></script>
@@ -48,44 +50,49 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script>
-	"use strict";
-	  // first we make sure annyang started succesfully
-	  if (annyang) {
-	    // define the functions our commands will run.
-	    var hello = function() {
-	    	alert('Hi! Welcome to IOLITE. I can hear you.');
-	    };
-	    var commands = {
-	    	      'hello (there)':        hello,
-	    	      
-	    	    };
-	 // OPTIONAL: activate debug mode for detailed logging in the console
-	    annyang.debug();
-	    // Add voice commands to respond to
-	    annyang.addCommands(commands);
-	    // OPTIONAL: Set a language for speech recognition (defaults to English)
-	    // For a full list of language codes, see the documentation:
-	    // https://github.com/TalAter/annyang/blob/master/docs/FAQ.md#what-languages-are-supported
-	    annyang.setLanguage('en');
-	    // Start listening. You can call this here, or attach this call to an event, button, etc.
-	    annyang.start();
-	  }
+    <script src="https://use.fontawesome.com/3bf01d5f6e.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="js/bootstrap-colorpicker.js"></script>
+    <script src="js/bootstrap-slider.js"></script>
 
-	</script>
-    
+    <!--    <script>
+            "use strict";
+            // first we make sure annyang started succesfully
+            if (annyang) {
+                // define the functions our commands will run.
+                var hello = function () {
+                    alert('Hi! Welcome to IOLITE. I can hear you.');
+                };
+                var commands = {
+                    'hello (there)': hello,
+
+                };
+                // OPTIONAL: activate debug mode for detailed logging in the console
+                annyang.debug();
+                // Add voice commands to respond to
+                annyang.addCommands(commands);
+                // OPTIONAL: Set a language for speech recognition (defaults to English)
+                // For a full list of language codes, see the documentation:
+                // https://github.com/TalAter/annyang/blob/master/docs/FAQ.md#what-languages-are-supported
+                annyang.setLanguage('en');
+                // Start listening. You can call this here, or attach this call to an event, button, etc.
+                annyang.start();
+            }
+
+        </script>-->
+
 </head>
 
 <body>
-	<!-- include the content template -->
-    <div ng-include="'header.tpl.html'"></div>
-	<div ng-include="'content.tpl.html'"></div>
+<!-- include the content template -->
+<div ng-include="'header.tpl.html'"></div>
+<div ng-include="'content.tpl.html'"></div>
 
-	<!-- load our angular modules/controllers/services/.. -->
-	<script type="text/javascript" src="app/example-app.js"></script>
-	<script type="text/javascript" src="app/example-controller1.js"></script>
-	<script type="text/javascript" src="app/example-controller2.js"></script>
-    <script type="text/javascript" src="app/navbarController.js"></script>
-	
+<!-- load our angular modules/controllers/services/.. -->
+<script type="text/javascript" src="app/example-app.js"></script>
+<script type="text/javascript" src="app/example-controller1.js"></script>
+<script type="text/javascript" src="app/example-controller2.js"></script>
+<script type="text/javascript" src="app/navbarController.js"></script>
+<script type="text/javascript" src="app/deviceDirective.js"></script>
 </body>
 </html>

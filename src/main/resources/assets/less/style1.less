@@ -5,28 +5,46 @@
 //@body-bg: #FAD7A0; // overwrite the Bootstrap background color
 
 .example-container {
-	&:extend(.container-fluid); // lets extend a Bootstrap class
+  &:extend(.container-fluid); // lets extend a Bootstrap class
 }
 
 .example-row {
-	.make-row(); // use Bootstrap mixin
+  .make-row(); // use Bootstrap mixin
 }
 
 .example-title {
-	.make-xs-column(12); // title should always span a whole row, Bootstrap has 12 columns,
-	
-	font-weight: bold;   // make the title bold
-	
-	// some margins
-	margin-top: 20px;
-	margin-bottom: 10px;
+  .make-xs-column(12); // title should always span a whole row, Bootstrap has 12 columns,
+
+  font-weight: bold; // make the title bold
+
+  // some margins
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .example-responsive-content {
-	.make-xs-column(12); // this element should fill the whole with in the mobile view
-	.make-sm-column(6);  // in bigger views, show 2 contents in one row
+  .make-xs-column(12); // this element should fill the whole with in the mobile view
+  //.make-sm-column(6);  // in bigger views, show 2 contents in one row
 }
 
 .example-whole-row-content {
-	.make-xs-column(12); 
+  .make-xs-column(12);
+}
+
+.roomrow {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.buttonrow {
+  padding-top: 5px;
+  padding-left: 60px;
+}
+
+.colorpickerCSS {
+  display: inline-block;
+}
+
+.form-control {
+  width: inherit;
 }
