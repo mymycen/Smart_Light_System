@@ -1287,7 +1287,7 @@ public class voiceCommander {
 
 	}
 
-	private class runPartyLight extends TimerTask {
+	public class runPartyLight extends TimerTask {
 		int dimmingLevel;
 		double hue;
 		double saturation;
@@ -1450,7 +1450,7 @@ public class voiceCommander {
 
 	}
 
-	private void stopPartyMode() throws InterruptedException {
+	public void stopPartyMode() throws InterruptedException {
 		if (timer1 != null) {
 			timer1.cancel();
 			timer1.purge();
