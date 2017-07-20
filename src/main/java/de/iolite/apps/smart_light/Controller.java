@@ -176,10 +176,6 @@ public final class Controller extends AbstractIOLITEApp {
             for (final PlaceSchedule placeSchedule : this.heatingAPI.getHeatingSchedulesOfPlaces()) {
                 LOGGER.debug("Heating schedule found for place '{}'", placeSchedule.getPlaceIdentifier());
             }
-            allModes.add(partyMode1);
-            allModes.add(partyMode2);
-            allModes.add(partyMode3);
-            allModes.add(partyMode4);
             allModes.add(sleepingMode);
             allModes.add(movieMode);
             allModes.add(romaticMode);
@@ -341,15 +337,18 @@ public final class Controller extends AbstractIOLITEApp {
         // default handler returning a not found status
         this.frontendAPI.registerDefaultRequestHandler(new NotFoundResponseHandler());
 
+
+        voiceCommandRequestHandler voicer = new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI);
         // example JSON request handlers
         this.frontendAPI.registerRequestHandler("rooms", new RoomsResponseHandler(environmentAPI));
-        this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler(LOGGER, deviceAPI));
         this.frontendAPI.registerRequestHandler("setValue", new setPropertyRequestHandler(LOGGER, deviceAPI, environmentAPI));
         this.frontendAPI.registerRequestHandler("roomsWithDevs", new RoomsWithDevicesResponseHandler(environmentAPI, deviceAPI, LOGGER));
-        this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
+        this.frontendAPI.registerRequestHandler("startVoice", voicer);
         this.frontendAPI.registerRequestHandler("getAllModes", new ModesResponseHandler(LOGGER, allModes));
         this.frontendAPI.registerRequestHandler("getStatus", new StatusResponseHandler(LOGGER, storageAPI));
-        this.frontendAPI.registerRequestHandler("changeAllLights", new changeAllLightsRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
+        this.frontendAPI.registerRequestHandler("changeAllLights", new changeAllLightsRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI, voicer.voice));
+        this.frontendAPI.registerRequestHandler("changeSettings", new changeSettingsOfLightRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
+        this.frontendAPI.registerRequestHandler("changeLightmode", new changeLightmodeRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
 
 
         this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());

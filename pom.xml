@@ -96,7 +96,7 @@
 					</execution>
 
 					<!-- java script tests with karma/jasmine -->
-					<execution>
+<!--					<execution>
 						<id>java script unit tests</id>
 						<goals>
 							<goal>karma</goal>
@@ -104,7 +104,7 @@
 						<configuration>
 							<karmaConfPath>src/test/resources/assets/karma.conf.ci.js</karmaConfPath>
 						</configuration>
-					</execution>
+					</execution>-->
 
 					<!-- validate all JS/HTML/LESS assets, see Gruntfile.js -->
 					<execution>
