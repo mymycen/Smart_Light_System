@@ -7,6 +7,7 @@ import de.iolite.app.api.environment.EnvironmentAPI;
 import de.iolite.app.api.frontend.util.FrontendAPIRequestHandler;
 import de.iolite.app.api.storage.StorageAPI;
 import de.iolite.app.api.storage.StorageAPIException;
+import de.iolite.apps.smart_light.voiceCommander;
 import de.iolite.common.requesthandler.IOLITEHTTPRequest;
 import de.iolite.common.requesthandler.IOLITEHTTPResponse;
 import de.iolite.common.requesthandler.IOLITEHTTPStaticResponse;
@@ -27,16 +28,26 @@ public class changeAllLightsRequestHandler extends FrontendAPIRequestHandler {
     private EnvironmentAPI environmentAPI;
     private StorageAPI storageAPI;
     private boolean alllights;
+    private voiceCommander voiceCommander;
 
-    public changeAllLightsRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI, StorageAPI storageAPI) {
+    public changeAllLightsRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI, StorageAPI storageAPI,
+                                         voiceCommander voiceCommander) {
         this.storageAPI = storageAPI;
         this.LOGGER = LOGGER;
         this.deviceAPI = deviceAPI;
         this.environmentAPI = environmentAPI;
+        this.voiceCommander = voiceCommander;
     }
+
 
     @Override
     protected IOLITEHTTPResponse handleRequest(final IOLITEHTTPRequest request, final String subPath) {
+
+        try {
+            voiceCommander.stopPartyMode();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
 
         String value = "false";

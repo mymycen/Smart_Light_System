@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 public class voiceCommandRequestHandler extends FrontendAPIRequestHandler {
 
     private Logger LOGGER;
-    private voiceCommander voice;
+    public voiceCommander voice;
     private StorageAPI storageAPI;
 
 
@@ -27,6 +27,14 @@ public class voiceCommandRequestHandler extends FrontendAPIRequestHandler {
         this.storageAPI = storageAPI;
         this.LOGGER = LOGGER;
         voice = new voiceCommander(LOGGER, deviceAPI, environmentAPI);
+    }
+
+    public voiceCommander getVoice() {
+        return voice;
+    }
+
+    public void setVoice(voiceCommander voice) {
+        this.voice = voice;
     }
 
     @Override

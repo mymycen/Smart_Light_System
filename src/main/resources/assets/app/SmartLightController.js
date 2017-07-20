@@ -1,18 +1,22 @@
 (function () {
     'use strict';
 
-    var exampleApp = angular.module('exampleApp');
+    var SmartLightApp = angular.module('SmartLightApp');
 
     /**
      * This controller calls 'rooms' and 'devices' request handlers which are registered in the ExampleApp.java.
      */
-    exampleApp.controller('ExampleController1', ['$scope', '$http', function ($scope, $http) {
+    SmartLightApp.controller('ExampleController1', ['$scope', '$http', function ($scope, $http) {
         $scope.rooms = [];
         $scope.devices = [];
         $scope.modes = [];
         $scope.status = [];
+        $scope.dimmLevel = 100;
+        $scope.selectedMode = "romantic";
 
-        $scope.selected = {"name": "hallo", "dicker": "oha"};
+        $scope.apartement = {"name": "Whole Apartement", "identifier": "apartement"};
+
+        $scope.selected = {"name": "Whole Apartement", "identifier": "apartement"};
 
         $('#toggle-two').change(function () {
             startVoice();
@@ -61,18 +65,9 @@
 
         $scope.setSelected = function (roomName) {
             console.log(roomName);
+            $scope.devices = roomName.devices;
             $scope.selected = roomName;
         };
-
-        // example request with POST with a parameter
-        $http.post('devices', {'propertyType': "http://iolite.de#on"}).then(function onSuccess(response) {
-            console.debug("fetchig devices was successfull");
-            console.debug(response.data);
-            $scope.devices = response.data.devices;
-        }, function onFailure(response) {
-            console.error("can't get devices");
-        });
-
 
         $scope.turnValue = function (deviceID) {
             $http.post('setValue', {'deviceType': deviceID}).then(function onSuccess(response) {
@@ -108,7 +103,47 @@
             var color = $('#cp7').colorpicker('getValue');
             var rgb = color;
             rgb = rgb.replace(/[^\d,]/g, '').split(',');
-            console.log(rgbToHsv(rgb[0], rgb[1], rgb[2]));
+            $('#densitySlider').slider({
+                formatter: function (value) {
+                    $scope.dimmLevel = value;
+                }
+            });
+            console.log($scope.dimmLevel);
+            var result = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+            var settings = {
+                "dimLevel": $scope.dimmLevel.toString(),
+                "hue": result[0].toString(),
+                "sat": result[1].toString(),
+                "dim": result[2].toString(),
+                "where": $scope.selected.identifier
+            };
+
+            $http.post('changeSettings', {
+                "settings": settings
+            }).then(function onSuccess(response) {
+                console.debug("fetchig devices was successfull");
+                console.debug(response.data);
+                $scope.value = response.data.value;
+            }, function onFailure(response) {
+                console.error("can't get devices");
+            });
+        };
+
+        $scope.sendLightmode = function () {
+            console.log($scope.selectedMode);
+            var settings = {
+                "modeName": $scope.selectedMode,
+                "where": $scope.selected.identifier
+            };
+            $http.post('changeLightmode', {
+                "settings": settings
+            }).then(function onSuccess(response) {
+                console.debug("fetchig devices was successfull");
+                console.debug(response.data);
+                $scope.value = response.data.value;
+            }, function onFailure(response) {
+                console.error("can't get devices");
+            });
         };
 
 

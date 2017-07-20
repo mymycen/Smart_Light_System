@@ -41,10 +41,10 @@ public class voiceCommander {
     private boolean speechThreadShouldEnd = true;
     private PlaySound playSound = new PlaySound();
     private static String currentLocation = "root";
-    private Timer timer1;
-    private Timer timer2;
-    private Timer timer3;
-    private Timer timer4;
+    public Timer timer1;
+    public Timer timer2;
+    public Timer timer3;
+    public Timer timer4;
 
     public enum Commands {
         TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING
@@ -1036,7 +1036,7 @@ public class voiceCommander {
 
     }
 
-    private class runPartyLight extends TimerTask {
+    public class runPartyLight extends TimerTask {
         int dimmingLevel;
         double hue;
         double saturation;
@@ -1199,7 +1199,7 @@ public class voiceCommander {
 
     }
 
-    private void stopPartyMode() throws InterruptedException {
+    public void stopPartyMode() throws InterruptedException {
         if (timer1 != null) {
             timer1.cancel();
             timer1.purge();
