@@ -3,17 +3,14 @@ package de.iolite.apps.smart_light.RequestHandlers;
 import de.iolite.app.api.device.access.DeviceAPI;
 import de.iolite.app.api.environment.EnvironmentAPI;
 import de.iolite.app.api.frontend.util.FrontendAPIRequestHandler;
-import de.iolite.apps.smart_light.processHttp;
+import de.iolite.app.api.storage.StorageAPI;
+import de.iolite.app.api.storage.StorageAPIException;
 import de.iolite.apps.smart_light.voiceCommander;
-import de.iolite.common.requesthandler.HTTPStatus;
 import de.iolite.common.requesthandler.IOLITEHTTPRequest;
 import de.iolite.common.requesthandler.IOLITEHTTPResponse;
 import de.iolite.common.requesthandler.IOLITEHTTPStaticResponse;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
-import java.io.IOException;
 
 /**
  * Created by Leo on 21.06.2017.
@@ -22,39 +19,48 @@ import java.io.IOException;
 public class voiceCommandRequestHandler extends FrontendAPIRequestHandler {
 
     private Logger LOGGER;
-    private DeviceAPI deviceAPI;
-    private EnvironmentAPI environmentAPI;
-    private processHttp processor = new processHttp();
     private voiceCommander voice;
+    private StorageAPI storageAPI;
 
-    public voiceCommandRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
 
+    public voiceCommandRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI, StorageAPI storageAPI) {
+        this.storageAPI = storageAPI;
         this.LOGGER = LOGGER;
-        this.deviceAPI = deviceAPI;
-        this.environmentAPI = environmentAPI;
         voice = new voiceCommander(LOGGER, deviceAPI, environmentAPI);
     }
 
     @Override
     protected IOLITEHTTPResponse handleRequest(final IOLITEHTTPRequest request, final String subPath) {
-        String value = "false";
-        String changeVoice;
+        boolean value = true;
 
         try {
-            changeVoice = new JSONObject(processor.readPassedData(request)).getString("changeVoice");
-        } catch (final JSONException e) {
-            LOGGER.error("Could not handle devices request due to a JSON error: {}", e.getMessage(), e);
-            return new IOLITEHTTPStaticResponse(e.getMessage(), HTTPStatus.BadRequest, "text/plain");
-        } catch (final IOException e) {
-            LOGGER.error("Could not handle devices request due to an I/O error: {}", e.getMessage(), e);
-            return new IOLITEHTTPStaticResponse(e.getMessage(), HTTPStatus.BadRequest, "text/plain");
+            value = storageAPI.loadBoolean("recognition");
+            LOGGER.info(Boolean.toString(value));
+        } catch (StorageAPIException e) {
+            e.printStackTrace();
         }
 
-        if (changeVoice.equals("false")) {
+
+        if (!value) {
+            try {
+                LOGGER.info(Boolean.toString(true));
+                storageAPI.saveBoolean("recognition", true);
+            } catch (StorageAPIException e) {
+                e.printStackTrace();
+            }
             voice.executeVoiceCommand();
         } else {
+            try {
+                LOGGER.info(Boolean.toString(false));
+                storageAPI.saveBoolean("recognition", false);
+            } catch (StorageAPIException e) {
+                e.printStackTrace();
+            }
             voice.stopRecognition();
         }
+
+
+
 
 /*        final JSONArray jsonDeviceArray = new JSONArray();
         for (final Device device : deviceAPI.getDevices()) {

@@ -1,41 +1,130 @@
-<div class="example-container" >
-	<div class="example-row" ng-controller="ExampleController1">
-		
-		<div class="example-title">Rooms</div>
-		<div class="example-responsive-content" ng-repeat="room in rooms">
-			<span ng-bind="room"></span>
-		</div>
+<div class="example-container">
+    <div class="example-row" ng-controller="ExampleController1">
 
-		<button class="btn btn-primary btn-large" ng-click="startVoice()">Change Light</button>
+        <div class="example-title">Rooms</div>
+        <div class="row">
+            <div class="col-lg-4 col-xs-12 col-md-6">
+                <div class="row roomrow">
+                    <div devicediv ng-repeat="room in rooms">
+                        <a href="#" class="roomDiv thumbnail" ng-click="getDevsInRoom(room)">
+                            <div class="img-container">
+                                <div class="positioning">
+                                    <span ng-bind="room.name"></span>
+                                </div>
+                                <div class="positioningLamp" ng-repeat="device in room.devices">
+                                    <i class="fa fa-lightbulb-o" aria-hidden="true"> - {{device.name}}</i>
+                                </div>
+                                <img ng-src="img/roomtemplate.png"/>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="buttonrow col-lg-4 col-xs-12 col-md-6">
+                <div class="row">
+                    <h3 ng-bind="'Selected area : ' + selected.name"></h3>
+                </div>
 
-		<div class="example-title">Devices with ON/OFF property</div>
-		<div class="example-responsive-content" ng-repeat="device in devices">
-			<span ng-bind="device.name"></span>
-			<span ng-bind="device.identifier"></span>
-			<button class="btn btn-primary btn-large" ng-click="turnValue(device.identifier)">Change Light</button>
-		</div>
-	</div>
-	
-	<h3>Using ModelAPI JS interface</h3>
-	<div class="example-row" ng-controller="ExampleController2">
-		
-		<div class="example-title">ModelAPI Profiles</div>
-		<div class="example-responsive-content" ng-bind="profileKeys">
-		</div>
-		
-		<div class="example-title">Execute StorageAPI.loadInt action</div>
-		<div class="example-responsive-content">
-			StorageAPI.loadInt("test")= <span ng-bind="testValueLoadedFromStorageAPI"></span>
-		</div>
-		
-		<div class="example-title">Query EnvironmentAPI with path "./locations" </div>
-		<div class="example-responsive-content" ng-repeat="location in roomsQueredWithEnvironmentAPI">
-			<span ng-bind="location.name"></span>
-		</div>
-		
-		<div class="example-title">Subscribe EnvironmentAPI with path "./devices" </div>
-		<div class="example-responsive-content">
-			<pre ng-bind="subscriptionLogs"></pre>
-		</div>
-	</div>
+                <div class="row">
+                    <h5>Pick a color :</h5>
+                    <div class="colorpickerCSS" id="cp7"></div>
+                    <div class="exchangeDiv">
+                    </div>
+                    <h5>Change the density :</h5>
+                    <input id="densitySlider" data-slider-id='ex1Slider' type="text" data-slider-min="0"
+                           data-slider-max="100"
+                           data-slider-step="1" data-slider-value="0"/>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="sel1">Select list:</label>
+                        <select class="form-control" id="sel1">
+                            <option ng-repeat="mode in modes">{{mode.name}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="buttonrow col-lg-4 col-xs-12 col-md-6">
+                <div class="row">
+                    <h3>Global settings :</h3>
+                </div>
+                <div class="row">
+                    <label class="col-lg-6 col-xs-6 col-md-6">All lights</label>
+                    <label class="col-lg-6 col-xs-6 col-md-6">
+                        <input type="checkbox" id="toggle-one" checked data-toggle="toggle">
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="col-lg-6 col-xs-6 col-md-6">Voice recognition</label>
+                    <label class="col-lg-6 col-xs-6 col-md-6">
+                        <input type="checkbox" id="toggle-two" ng-change="startVoice()" data-toggle="toggle">
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="col-lg-6 col-xs-6 col-md-6">Movement detection</label>
+                    <label class="col-lg-6 col-xs-6 col-md-6">
+                        <input type="checkbox" id="toggle-three" checked data-toggle="toggle">
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="col-lg-6 col-xs-6 col-md-6">"God" mode</label>
+                    <label class="col-lg-6 col-xs-6 col-md-6">
+                        <input type="checkbox" id="toggle-four" checked data-toggle="toggle">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary btn-large" ng-click="sendSettings()">Send the Settings</button>
+
+
+        <div class="example-title">Devices with ON/OFF property</div>
+        <div class="example-responsive-content" ng-repeat="device in devices">
+            <span ng-bind="device.name"></span>
+            <span ng-bind="device.identifier"></span>
+            <button class="btn btn-primary btn-large" ng-click="turnValue(device.identifier)">Change Light</button>
+        </div>
+    </div>
+
+    <h3>Using ModelAPI JS interface</h3>
+    <div class="example-row" ng-controller="ExampleController2">
+
+        <div class="example-title">ModelAPI Profiles</div>
+        <div class="example-responsive-content" ng-bind="profileKeys">
+        </div>
+
+        <div class="example-title">Execute StorageAPI.loadInt action</div>
+        <div class="example-responsive-content">
+            StorageAPI.loadInt("test")= <span ng-bind="testValueLoadedFromStorageAPI"></span>
+        </div>
+
+        <div class="example-title">Query EnvironmentAPI with path "./locations"</div>
+        <div class="example-responsive-content" ng-repeat="location in roomsQueredWithEnvironmentAPI">
+            <span ng-bind="location.name"></span>
+        </div>
+
+        <div class="example-title">Subscribe EnvironmentAPI with path "./devices"</div>
+        <div class="example-responsive-content">
+            <pre ng-bind="subscriptionLogs"></pre>
+        </div>
+    </div>
 </div>
+<script>
+    $(function () {
+        $('#toggle-one').bootstrapToggle();
+        $('#toggle-two').bootstrapToggle({});
+        $('#toggle-three').bootstrapToggle();
+        $('#toggle-four').bootstrapToggle();
+        $('#cp7').colorpicker({
+            color: '#ffffff',
+            format: 'rgb',
+            container: true,
+            inline: true
+        });
+        $('#densitySlider').slider({
+            formatter: function (value) {
+                return 'Current value: ' + value;
+            }
+        });
+    });
+</script>

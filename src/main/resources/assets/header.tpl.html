@@ -1,19 +1,26 @@
-<div class="navbar-smart" ng-controller="ExampleController1">
-    <div class="navbar-left">
-            <a class="btn btn-navbar navbar-link-smart" data-toggle="collapse" data-target=".nav-collapse">
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
-            </a>
-            <a class="navbar-link-smart" href="#">SmartLight</a>
-    </div>
-    <div class="navbar-right">
-        <div class="navbar-collapse">
-            <ul class="nav pull-right">
-                <li><a class="navbar-link-smart" href="#">Link</a></li>
-                <li class="divider-vertical"></li>
-                <li><a class="navbar-link-smart" href="#">Link</a></li>
-            </ul>
+            </button>
+            <a class="navbar-brand" href="#"><i class="fa fa-lightbulb-o" aria-hidden="true"></i></a>
         </div>
-    </div>
-</div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <p class="navbar-text">Welcome to the Smart Light System</p>
+            <ul class="nav navbar-nav">
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Link</a></li>
+                <li><a href="#">Link</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
