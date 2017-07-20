@@ -292,6 +292,7 @@ public class voiceCommander {
             }
             if (isCommandExecuted = true) {
                 playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_ON.toString());
+                isCommandExecuted = false;
             }
 
         } else if (result != null && started == true && result.toLowerCase().contains("light")
@@ -397,6 +398,7 @@ public class voiceCommander {
             }
             if (isCommandExecuted = true) {
                 playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_OFF.toString());
+                isCommandExecuted = false;
             }
 
         } else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
