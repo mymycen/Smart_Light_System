@@ -33,9 +33,7 @@ public class voiceCommander {
     private String speech;
     private static List<Location> rooms;
 
-    static boolean isLightTurnedon = false;
-    static boolean isLightTurnedoff = false;
-    static boolean isLightModeChanged = false;
+    static boolean isCommandExecuted = false;
     static boolean isPartyModeOn = false;
     private boolean started = false;
     private boolean stopped = true;
@@ -48,7 +46,7 @@ public class voiceCommander {
     private Timer timer4;
 
     public enum Commands {
-        TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING
+        TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING, BRIGHTER, DARKER, MAX_BRIGHTNESS, MIN_BRIGHTNESS
     }
 
     ;
@@ -222,7 +220,7 @@ public class voiceCommander {
                                                         // TODO Auto-generated
                                                         // method
                                                         // stub
-                                                        isLightTurnedon = true;
+                                                        isCommandExecuted = true;
 
                                                     }
 
@@ -270,7 +268,7 @@ public class voiceCommander {
                                 @Override
                                 public void valueChanged(Boolean arg0) {
                                     // TODO Auto-generated method stub
-                                    isLightTurnedon = true;
+                                    isCommandExecuted = true;
 
                                 }
 
@@ -292,8 +290,9 @@ public class voiceCommander {
                 }
 
             }
-            if (isLightTurnedon = true) {
+            if (isCommandExecuted = true) {
                 playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_ON.toString());
+                isCommandExecuted = false;
             }
 
         } else if (result != null && started == true && result.toLowerCase().contains("light")
@@ -327,7 +326,7 @@ public class voiceCommander {
                                                         // TODO Auto-generated
                                                         // method
                                                         // stub
-                                                        isLightTurnedoff = true;
+                                                        isCommandExecuted = true;
 
                                                     }
 
@@ -375,7 +374,7 @@ public class voiceCommander {
                                 @Override
                                 public void valueChanged(Boolean arg0) {
                                     // TODO Auto-generated method stub
-                                    isLightTurnedoff = true;
+                                    isCommandExecuted = true;
 
                                 }
 
@@ -397,8 +396,9 @@ public class voiceCommander {
                 }
 
             }
-            if (isLightTurnedoff = true) {
+            if (isCommandExecuted = true) {
                 playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_OFF.toString());
+                isCommandExecuted = false;
             }
 
         } else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
