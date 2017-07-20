@@ -78,7 +78,7 @@ public final class Controller extends AbstractIOLITEApp {
     public static LightMode partyMode4 = new LightMode(1, 240.0, 100.0, "Party4");
     public static LightMode sleepingMode = new LightMode(3, 2.0, 100.0, "Sleeping");
     public static LightMode movieMode = new LightMode(10, 275, 57, "Movie");
-    public static LightMode workingMode = new LightMode(100, 0.0, 100.0, "Working");
+    public static LightMode workingMode = new LightMode(100, 0.0, 0.0, "Working");
 
     /**
      * front end assets
