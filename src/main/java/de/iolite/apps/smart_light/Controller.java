@@ -346,7 +346,7 @@ public final class Controller extends AbstractIOLITEApp {
         this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler(LOGGER, deviceAPI));
         this.frontendAPI.registerRequestHandler("setValue", new setPropertyRequestHandler(LOGGER, deviceAPI, environmentAPI));
         this.frontendAPI.registerRequestHandler("roomsWithDevs", new RoomsWithDevicesResponseHandler(environmentAPI, deviceAPI, LOGGER));
-        this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI,storageAPI));
+        this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
         this.frontendAPI.registerRequestHandler("getAllModes", new ModesResponseHandler(LOGGER, allModes));
         this.frontendAPI.registerRequestHandler("getStatus", new StatusResponseHandler(LOGGER, storageAPI));
 

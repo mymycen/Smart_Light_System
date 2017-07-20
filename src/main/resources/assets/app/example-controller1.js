@@ -14,23 +14,25 @@
 
         $scope.selected = {"name": "hallo", "dicker": "oha"};
 
-        var voicer = "false";
+        $('#toggle-two').change(function () {
+            startVoice();
+        });
 
         $http.get('getStatus').then(function onSuccess(response) {
             console.debug("fetchig status was successfull");
             console.log(response.data.status);
             $scope.status = response.data.status;
-            if (!response.data.status[3].value) {
-                $('#toggle-one').bootstrapToggle('off');
+            if (response.data.status[3].value) {
+                $('#toggle-one').bootstrapToggle('on');
             }
-            if (!response.data.status[0].value) {
-                $('#toggle-two').bootstrapToggle('off');
+            if (response.data.status[0].value) {
+                $('#toggle-two').bootstrapToggle('on');
             }
-            if (!response.data.status[1].value) {
-                $('#toggle-three').bootstrapToggle('off');
+            if (response.data.status[1].value) {
+                $('#toggle-three').bootstrapToggle('on');
             }
-            if (!response.data.status[2].value) {
-                $('#toggle-four').bootstrapToggle('off');
+            if (response.data.status[2].value) {
+                $('#toggle-four').bootstrapToggle('on');
             }
         }, function onFailure(response) {
             console.error("can't get status");
@@ -80,13 +82,13 @@
             });
         };
 
-        $scope.startVoice = function () {
-            $http.post('startVoice'.then(function onSuccess(response) {
+        var startVoice = function () {
+            $http.post('startVoice').then(function onSuccess(response) {
                 console.debug("successfully changed voice recognition");
                 $scope.value = response.data.value;
             }, function onFailure(response) {
-                console.error("problem changing voice recognition" + response);
-            }));
+                console.error("problem changing voice recognition" + response.toString());
+            });
         };
 
 
