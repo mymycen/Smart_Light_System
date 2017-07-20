@@ -22,6 +22,7 @@ import java.util.Timer;
 
 /**
  * Author Thanh Phuong Siewert
+ * in this class the voice recognition and its processing (light control and executing defined light modes) are implemented
  */
 public class voiceCommander {
 
@@ -32,9 +33,10 @@ public class voiceCommander {
 	private String speech;
 	private static List<Location> rooms;
 
-	static boolean isLightTurnedon = false;
-	static boolean isLightTurnedoff = false;
-	static boolean isLightModeChanged = false;
+//	static boolean isLightTurnedon = false;
+//	static boolean isLightTurnedoff = false;
+//	static boolean isLightModeChanged = false;
+	static boolean isCommandExecuted = false;
 	static boolean isPartyModeOn = false;
 	private boolean started = false;
 	private boolean stopped = true;
@@ -48,7 +50,7 @@ public class voiceCommander {
 	private Timer timer4;
 
 	public enum Commands {
-		TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING
+		TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING, DARKER, BRIGHTER, MAX_BRIGHTNESS, MIN_BRIGHTNESS
 	};
 
 	public voiceCommander(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
@@ -57,8 +59,7 @@ public class voiceCommander {
 		this.environmentAPI = environmentAPI;
 		rooms = environmentAPI.getLocations();
 
-		// Configuration
-
+		
 	}
 
 	public void stopRecognition() {
@@ -68,6 +69,7 @@ public class voiceCommander {
 	}
 
 	public void executeVoiceCommand() {
+		// voice recognizer configuration
 
 		Configuration configuration = new Configuration();
 		configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
@@ -77,7 +79,7 @@ public class voiceCommander {
 		configuration.setUseGrammar(true);
 		try {
 			recognizer = new LiveSpeechRecognizer(configuration);
-			LOGGER.info("CREATED BITCH");
+			LOGGER.info("VOICE RECOGNIZER CREATED");
 		} catch (Exception ex) {
 			LOGGER.debug("PROBLEM" + ex.getMessage());
 		}
@@ -217,7 +219,7 @@ public class voiceCommander {
 														// TODO Auto-generated
 														// method
 														// stub
-														isLightTurnedon = true;
+														isCommandExecuted = true;
 
 													}
 
@@ -265,7 +267,7 @@ public class voiceCommander {
 								@Override
 								public void valueChanged(Boolean arg0) {
 									// TODO Auto-generated method stub
-									isLightTurnedon = true;
+									isCommandExecuted = true;
 
 								}
 
@@ -287,8 +289,9 @@ public class voiceCommander {
 				}
 
 			}
-			if (isLightTurnedon = true) {
+			if (isCommandExecuted = true) {
 				playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_ON.toString());
+				isCommandExecuted = false;
 			}
 
 		} else if (result != null && started == true && result.toLowerCase().contains("light")
@@ -322,7 +325,7 @@ public class voiceCommander {
 														// TODO Auto-generated
 														// method
 														// stub
-														isLightTurnedoff = true;
+														isCommandExecuted = true;
 
 													}
 
@@ -370,7 +373,7 @@ public class voiceCommander {
 								@Override
 								public void valueChanged(Boolean arg0) {
 									// TODO Auto-generated method stub
-									isLightTurnedoff = true;
+									isCommandExecuted = true;
 
 								}
 
@@ -392,8 +395,9 @@ public class voiceCommander {
 				}
 
 			}
-			if (isLightTurnedoff = true) {
+			if (isCommandExecuted = true) {
 				playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_OFF.toString());
+				isCommandExecuted = false;
 			}
 
 		} else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
@@ -441,7 +445,7 @@ public class voiceCommander {
 										@Override
 										public void valueChanged(Integer arg0) {
 											// TODO Auto-generated method stub
-											isLightModeChanged = true;
+											isCommandExecuted = true;
 										}
 
 										@Override
@@ -509,7 +513,7 @@ public class voiceCommander {
 							@Override
 							public void valueChanged(Integer arg0) {
 								// TODO Auto-generated method stub
-								isLightModeChanged = true;
+								isCommandExecuted = true;
 							}
 
 							@Override
@@ -541,9 +545,9 @@ public class voiceCommander {
 				}
 
 			}
-			if (isLightModeChanged = true) {
+			if (isCommandExecuted = true) {
 				playSound.playMp3(voiceCommander.Commands.ROMANTIC.toString());
-				isLightModeChanged = false;
+				isCommandExecuted = false;
 
 			}
 
@@ -577,9 +581,9 @@ public class voiceCommander {
 				timer4 = new Timer();
 				timer4.schedule(task4, 6000, 8000);
 
-				if (isLightModeChanged = true) {
+				if (isCommandExecuted = true) {
 					playSound.playMp3(voiceCommander.Commands.PARTY.toString());
-					isLightModeChanged = false;
+					isCommandExecuted = false;
 
 				}
 			}
@@ -628,7 +632,7 @@ public class voiceCommander {
 										@Override
 										public void valueChanged(Integer arg0) {
 											// TODO Auto-generated method stub
-											isLightModeChanged = true;
+											isCommandExecuted = true;
 										}
 
 										@Override
@@ -696,7 +700,7 @@ public class voiceCommander {
 							@Override
 							public void valueChanged(Integer arg0) {
 								// TODO Auto-generated method stub
-								isLightModeChanged = true;
+								isCommandExecuted = true;
 							}
 
 							@Override
@@ -728,9 +732,9 @@ public class voiceCommander {
 				}
 
 			}
-			if (isLightModeChanged = true) {
+			if (isCommandExecuted = true) {
 				playSound.playMp3(voiceCommander.Commands.SLEEPING.toString());
-				isLightModeChanged = false;
+				isCommandExecuted = false;
 
 			}
 		} else if (result != null && started == true && result.toLowerCase().contains("movie")) {
@@ -777,7 +781,7 @@ public class voiceCommander {
 										@Override
 										public void valueChanged(Integer arg0) {
 											// TODO Auto-generated method stub
-											isLightModeChanged = true;
+											isCommandExecuted = true;
 										}
 
 										@Override
@@ -845,7 +849,7 @@ public class voiceCommander {
 							@Override
 							public void valueChanged(Integer arg0) {
 								// TODO Auto-generated method stub
-								isLightModeChanged = true;
+								isCommandExecuted = true;
 							}
 
 							@Override
@@ -877,9 +881,9 @@ public class voiceCommander {
 				}
 
 			}
-			if (isLightModeChanged = true) {
+			if (isCommandExecuted = true) {
 				playSound.playMp3(voiceCommander.Commands.MOVIE.toString());
-				isLightModeChanged = false;
+				isCommandExecuted = false;
 
 			}
 		} else if (result != null && started == true && result.toLowerCase().contains("working")) {
@@ -923,7 +927,7 @@ public class voiceCommander {
 										@Override
 										public void valueChanged(Integer arg0) {
 											// TODO Auto-generated method stub
-											isLightModeChanged = true;
+											isCommandExecuted = true;
 										}
 
 										@Override
@@ -991,7 +995,7 @@ public class voiceCommander {
 							@Override
 							public void valueChanged(Integer arg0) {
 								// TODO Auto-generated method stub
-								isLightModeChanged = true;
+								isCommandExecuted = true;
 							}
 
 							@Override
@@ -1023,11 +1027,219 @@ public class voiceCommander {
 				}
 
 			}
-			if (isLightModeChanged = true) {
+			if (isCommandExecuted = true) {
 				playSound.playMp3(voiceCommander.Commands.WORKING.toString());
-				isLightModeChanged = false;
+				isCommandExecuted = false;
 
 			}
+		}
+		else if (result != null && started == true && result.toLowerCase().contains("light")
+				&& result.toLowerCase().contains("brighter")) {
+			stopped = true;
+			started = false;
+			if (isPartyModeOn == true) {
+				stopPartyMode();
+				isPartyModeOn = false;
+			}
+
+			for (Location location : rooms) {
+				if (location.getName().equals(currentLocation)) {
+					List<Device> devices = location.getDevices();
+
+					for (de.iolite.app.api.environment.Device device : devices) {
+						String deviceIdentifier = device.getIdentifier();
+						for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
+								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+									final DeviceIntegerProperty onProperty = deviceControl
+											.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+									int newDimmLevel = onProperty.getValue() +20;
+									if(newDimmLevel <= 100){
+										onProperty.requestValueUpdate(newDimmLevel);
+										onProperty.setObserver(new DeviceIntegerPropertyObserver() {
+											
+											@Override
+											public void valueChanged(Integer arg0) {
+												// TODO Auto-generated method stub
+												isCommandExecuted = true;
+											}
+											
+											@Override
+											public void keyChanged(String arg0) {
+												// TODO Auto-generated method stub
+												
+											}
+											
+											@Override
+											public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
+												// TODO Auto-generated method stub
+												
+											}
+										});
+									}
+									else{
+										onProperty.requestValueUpdate(100);
+										playSound.playMp3(voiceCommander.Commands.MAX_BRIGHTNESS.toString());
+									}
+								}
+							}
+						}
+					}
+
+				}
+
+			}
+
+			if (currentLocation.equals("root")) {
+
+				for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+
+					if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+						final DeviceIntegerProperty onProperty = deviceControl
+								.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+						int newDimmLevel = onProperty.getValue() +20;
+						if(newDimmLevel <= 100){
+							onProperty.requestValueUpdate(newDimmLevel);
+							onProperty.setObserver(new DeviceIntegerPropertyObserver() {
+								
+								@Override
+								public void valueChanged(Integer arg0) {
+									// TODO Auto-generated method stub
+									isCommandExecuted = true;
+								}
+								
+								@Override
+								public void keyChanged(String arg0) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+							
+						}
+						else{
+							onProperty.requestValueUpdate(100);
+							playSound.playMp3(voiceCommander.Commands.MAX_BRIGHTNESS.toString());
+						}
+					}
+				}
+
+			}
+			if (isCommandExecuted = true) {
+				playSound.playMp3(voiceCommander.Commands.BRIGHTER.toString());
+			}
+
+		}
+		else if (result != null && started == true && result.toLowerCase().contains("light")
+				&& result.toLowerCase().contains("darker")) {
+			stopped = true;
+			started = false;
+			if (isPartyModeOn == true) {
+				stopPartyMode();
+				isPartyModeOn = false;
+			}
+
+			for (Location location : rooms) {
+				if (location.getName().equals(currentLocation)) {
+					List<Device> devices = location.getDevices();
+
+					for (de.iolite.app.api.environment.Device device : devices) {
+						String deviceIdentifier = device.getIdentifier();
+						for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
+								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+									final DeviceIntegerProperty onProperty = deviceControl
+											.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+									int newDimmLevel = onProperty.getValue() - 20;
+									if(newDimmLevel >= 1){
+										onProperty.requestValueUpdate(newDimmLevel);
+										onProperty.setObserver(new DeviceIntegerPropertyObserver() {
+											
+											@Override
+											public void valueChanged(Integer arg0) {
+												// TODO Auto-generated method stub
+												isCommandExecuted = true;
+											}
+											
+											@Override
+											public void keyChanged(String arg0) {
+												// TODO Auto-generated method stub
+												
+											}
+											
+											@Override
+											public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
+												// TODO Auto-generated method stub
+												
+											}
+										});
+									}
+									else{
+										onProperty.requestValueUpdate(1);
+										playSound.playMp3(voiceCommander.Commands.MIN_BRIGHTNESS.toString());
+									}
+								}
+							}
+						}
+					}
+
+				}
+
+			}
+
+			if (currentLocation.equals("root")) {
+
+				for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+
+					if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+						final DeviceIntegerProperty onProperty = deviceControl
+								.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+						int newDimmLevel = onProperty.getValue() - 20;
+						if(newDimmLevel >= 1){
+							onProperty.requestValueUpdate(newDimmLevel);
+							onProperty.setObserver(new DeviceIntegerPropertyObserver() {
+								
+								@Override
+								public void valueChanged(Integer arg0) {
+									// TODO Auto-generated method stub
+									isCommandExecuted = true;
+								}
+								
+								@Override
+								public void keyChanged(String arg0) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+							
+						}
+						else{
+							onProperty.requestValueUpdate(1);
+							playSound.playMp3(voiceCommander.Commands.MIN_BRIGHTNESS.toString());
+						}
+					}
+				}
+
+			}
+			if (isCommandExecuted = true) {
+				playSound.playMp3(voiceCommander.Commands.DARKER.toString());
+			}
+
 		}
 
 	}
@@ -1091,7 +1303,7 @@ public class voiceCommander {
 										@Override
 										public void valueChanged(Integer arg0) {
 											// TODO Auto-generated method stub
-											isLightModeChanged = true;
+											isCommandExecuted = true;
 										}
 
 										@Override
@@ -1159,7 +1371,7 @@ public class voiceCommander {
 							@Override
 							public void valueChanged(Integer arg0) {
 								// TODO Auto-generated method stub
-								isLightModeChanged = true;
+								isCommandExecuted = true;
 							}
 
 							@Override

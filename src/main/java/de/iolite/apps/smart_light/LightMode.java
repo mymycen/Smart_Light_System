@@ -1,5 +1,10 @@
 package de.iolite.apps.smart_light;
 
+/**
+ * Author Thanh Phuong Siewert
+ * Light Mode class with getter and setter
+ */
+
 public class LightMode {
 	
 	int dimmLevel;
@@ -29,6 +34,4 @@ public class LightMode {
 		this.saturation = saturation;
 	}
 	
-	
-
 }
