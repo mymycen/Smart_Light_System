@@ -28,7 +28,7 @@ public class changeAllLightsRequestHandler extends FrontendAPIRequestHandler {
     private EnvironmentAPI environmentAPI;
     private StorageAPI storageAPI;
     private boolean alllights;
-    private voiceCommander voiceCommander;
+    public voiceCommander voiceCommander;
 
     public changeAllLightsRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI, StorageAPI storageAPI,
                                          voiceCommander voiceCommander) {
