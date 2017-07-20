@@ -18,6 +18,11 @@
             startVoice();
         });
 
+        $('#toggle-one').change(function () {
+            changeLights();
+        });
+
+
         $http.get('getStatus').then(function onSuccess(response) {
             console.debug("fetchig status was successfull");
             console.log(response.data.status);
@@ -54,12 +59,9 @@
             console.error("can't get modes");
         });
 
-        $scope.getDevsInRoom = function (roomName) {
-            $http.post('devsPerRoom', {'roomName': roomName}).then(function onSuccess(response) {
-                $scope.devsInRoom = response.data.devices;
-            }, function onFailure(response) {
-                console.error("can't get devices per room" + response.toString());
-            });
+        $scope.setSelected = function (roomName) {
+            console.log(roomName);
+            $scope.selected = roomName;
         };
 
         // example request with POST with a parameter
@@ -88,6 +90,16 @@
                 $scope.value = response.data.value;
             }, function onFailure(response) {
                 console.error("problem changing voice recognition" + response.toString());
+            });
+        };
+
+
+        var changeLights = function () {
+            $http.post('changeAllLights').then(function onSuccess(response) {
+                console.debug("successfully changed all lightss");
+                $scope.value = response.data.value;
+            }, function onFailure(response) {
+                console.error("problem changing all lights" + response.toString());
             });
         };
 
