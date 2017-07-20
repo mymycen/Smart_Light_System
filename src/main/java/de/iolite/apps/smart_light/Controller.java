@@ -86,6 +86,7 @@ public final class Controller extends AbstractIOLITEApp {
     private Disposeable disposeableAssets;
     DeviceLogger dLogger = new DeviceLogger(LOGGER);
     Movement movement = new Movement();
+    AutoMode autoMode = new AutoMode();
     protected static List<Location> rooms;
     private processHttp processHttp = new processHttp();
 
@@ -196,7 +197,8 @@ public final class Controller extends AbstractIOLITEApp {
         }
 
         LOGGER.debug("Started");
-        //movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
+        movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
+        autoMode.activateAutopilot(LOGGER, deviceAPI, environmentAPI);
 /*		speechThreadshouldStart = true;
         executeVoiceCommand();*/
     }

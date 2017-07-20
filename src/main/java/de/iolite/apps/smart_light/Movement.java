@@ -62,8 +62,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class Movement {
-	
-    boolean lumi = false;
+	// lumi is true, because there is no luminance sensor and it will stimulated
+    boolean lumi = true;
 	boolean blinds = false;
 	/*
 public void activateAutopilot(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI){
@@ -187,7 +187,6 @@ public void detectMovement(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI en
 						public void valueChanged(Boolean arg0) {
 							
 							
-							LOGGER.info("Movement detected");
 							
 							
 							Location currentRoom = null;
@@ -195,42 +194,58 @@ public void detectMovement(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI en
 							for(Location location : roomlist){
 								
 								for (de.iolite.app.api.environment.Device roomDevice :location.getDevices()){
-									
+								
 									for(Device deviceControl: deviceList){
+										// lower then 5 %, it means blinds are nearly completely hidden
 										
-										if(deviceControl.getProfileIdentifier().equals("http://iolite.de#Blind")){
+										if(deviceControl.getProfileIdentifier().equals("http://iolite.de#Blind")&&deviceControl.getIdentifier().equals(roomDevice.getIdentifier())){
 											DeviceIntegerProperty blindProp= deviceControl.getIntegerProperty(DriverConstants.PROFILE_PROPERTY_Blind_blindLevel_ID);
 											int blind = blindProp.getValue();
-											if (blind > 95){
+											if(blindProp!=null){
+												LOGGER.info(""+blind);
+											if (blind <= 5){
 												blinds = true;
 											}	
 										}
+										}
+										
+									
+									// lower than 500 lux = sunset
 									if(deviceControl.getProfileIdentifier().equals("http://iolite.de#LuminanceSensor")){
 										DeviceDoubleProperty luxProp= deviceControl.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_LuminanceSensor_currentIlluminance_ID);
 										double lux = luxProp.getValue();
-										if (lux < 1000){
+										if(luxProp!=null){
+										if (lux < 500){
 											lumi = true;
 										}
 										
 									}
+									
+									
+									}
+								if (roomDevice.getIdentifier().equals(device.getIdentifier())&&device.getProfileIdentifier().equals(("http://iolite.de#MovementSensor"))&&lumi&&blinds){
+									
 										
-									if (deviceControl.getProfileIdentifier().equals(("http://iolite.de#MovementSensor"))&&deviceControl.getIdentifier().equals(roomDevice.getIdentifier())&&lumi&&blinds){
-										
-										
-									final DeviceBooleanProperty onPropertyMove = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
+									LOGGER.info("1");
+
+									 DeviceBooleanProperty onPropertyMove = device.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
 										if (onPropertyMove.getValue()){
 									
 									
+											LOGGER.info("2");
 
 											for(Device deviceControl2: deviceList){
 		
 										for(de.iolite.app.api.environment.Device lightdevices : location.getDevices()){
 										
 											if(deviceControl2.getProfileIdentifier().equals("http://iolite.de#Lamp")&&deviceControl2.getIdentifier().equals(lightdevices.getIdentifier())){
-												final DeviceBooleanProperty onPropertylight = deviceControl2.getBooleanProperty((DriverConstants.PROPERTY_on_ID));
+												 DeviceBooleanProperty onPropertylight = deviceControl2.getBooleanProperty((DriverConstants.PROFILE_PROPERTY_Lamp_on_ID));
 												
-												
+													LOGGER.info("3");
+
 												if (onPropertylight.getValue() == false && onPropertyMove.getValue()==true) {
+													LOGGER.info("4");
+
 											try {
 												onPropertylight.requestValueUpdate(true);
 												LOGGER.info("Light is on in the " + location.getName());
