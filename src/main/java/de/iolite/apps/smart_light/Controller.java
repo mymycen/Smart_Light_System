@@ -200,7 +200,7 @@ public final class Controller extends AbstractIOLITEApp {
         }
 
         LOGGER.debug("Started");
-        //movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
+        movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
 /*		speechThreadshouldStart = true;
         executeVoiceCommand();*/
     }
