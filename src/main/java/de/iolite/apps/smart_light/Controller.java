@@ -200,7 +200,7 @@ public final class Controller extends AbstractIOLITEApp {
         }
 
         LOGGER.debug("Started");
-        movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
+        //movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
 /*		speechThreadshouldStart = true;
         executeVoiceCommand();*/
     }
@@ -346,9 +346,10 @@ public final class Controller extends AbstractIOLITEApp {
         this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler(LOGGER, deviceAPI));
         this.frontendAPI.registerRequestHandler("setValue", new setPropertyRequestHandler(LOGGER, deviceAPI, environmentAPI));
         this.frontendAPI.registerRequestHandler("roomsWithDevs", new RoomsWithDevicesResponseHandler(environmentAPI, deviceAPI, LOGGER));
-        this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI,storageAPI));
+        this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
         this.frontendAPI.registerRequestHandler("getAllModes", new ModesResponseHandler(LOGGER, allModes));
         this.frontendAPI.registerRequestHandler("getStatus", new StatusResponseHandler(LOGGER, storageAPI));
+        this.frontendAPI.registerRequestHandler("changeAllLights", new changeAllLightsRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
 
 
         this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());

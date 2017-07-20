@@ -5,8 +5,8 @@
         <div class="row">
             <div class="col-lg-4 col-xs-12 col-md-6">
                 <div class="row roomrow">
-                    <div devicediv ng-repeat="room in rooms">
-                        <a href="#" class="roomDiv thumbnail" ng-click="getDevsInRoom(room)">
+                    <div ng-repeat="room in rooms">
+                        <a href="#" class="roomDiv thumbnail" ng-click="setSelected(room)">
                             <div class="img-container">
                                 <div class="positioning">
                                     <span ng-bind="room.name"></span>
@@ -37,7 +37,7 @@
                 </div>
                 <div class="row">
                     <div class="form-group">
-                        <label for="sel1">Select list:</label>
+                        <label for="sel1">Select a lightmode :</label>
                         <select class="form-control" id="sel1">
                             <option ng-repeat="mode in modes">{{mode.name}}</option>
                         </select>
@@ -51,25 +51,25 @@
                 <div class="row">
                     <label class="col-lg-6 col-xs-6 col-md-6">All lights</label>
                     <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-one" checked data-toggle="toggle">
+                        <input type="checkbox" id="toggle-one" data-toggle="toggle">
                     </label>
                 </div>
                 <div class="row">
                     <label class="col-lg-6 col-xs-6 col-md-6">Voice recognition</label>
                     <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-two" ng-change="startVoice()" data-toggle="toggle">
+                        <input type="checkbox" id="toggle-two" data-toggle="toggle">
                     </label>
                 </div>
                 <div class="row">
                     <label class="col-lg-6 col-xs-6 col-md-6">Movement detection</label>
                     <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-three" checked data-toggle="toggle">
+                        <input type="checkbox" id="toggle-three" data-toggle="toggle">
                     </label>
                 </div>
                 <div class="row">
                     <label class="col-lg-6 col-xs-6 col-md-6">"God" mode</label>
                     <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-four" checked data-toggle="toggle">
+                        <input type="checkbox" id="toggle-four" data-toggle="toggle">
                     </label>
                 </div>
             </div>
