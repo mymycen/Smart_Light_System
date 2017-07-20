@@ -34,6 +34,10 @@ public class PlaySound implements LineListener{
 	private static String movie_audio = "/sounds/movie.WAV";
 	private static String study_audio = "/sounds/study.WAV";
 	private static String sleep_audio = "/sounds/sleep.WAV";
+	private static String brighter_audio = "/sounds/brighter.WAV";
+	private static String darker_audio = "/sounds/darker.WAV";
+	private static String max_brightness_audio = "/sounds/max_brightness.WAV";
+	private static String min_brightness_audio = "/sounds/min_brightness.WAV";
 
 
 	boolean playCompleted;
@@ -103,8 +107,21 @@ public class PlaySound implements LineListener{
 		case "MOVIE":
 			filePath = movie_audio;
 			break;
-		case "STUDYING":
+		case "WORKING":
 			filePath = study_audio;
+			break;
+			
+		case "BRIGHTER":
+			filePath = brighter_audio;
+			break;
+		case "DARKER":
+			filePath = darker_audio;
+			break;
+		case "MAX_BRIGHTNESS":
+			filePath =max_brightness_audio;
+			break;
+		case "MIN_BRIGHTNESS":
+			filePath = min_brightness_audio;
 			
 
 		}
