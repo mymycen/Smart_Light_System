@@ -5,7 +5,7 @@ import de.iolite.app.api.environment.EnvironmentAPI;
 import de.iolite.app.api.frontend.util.FrontendAPIRequestHandler;
 import de.iolite.app.api.storage.StorageAPI;
 import de.iolite.app.api.storage.StorageAPIException;
-import de.iolite.apps.smart_light.voiceCommander;
+import de.iolite.apps.smart_light.Movement;
 import de.iolite.common.requesthandler.IOLITEHTTPRequest;
 import de.iolite.common.requesthandler.IOLITEHTTPResponse;
 import de.iolite.common.requesthandler.IOLITEHTTPStaticResponse;
@@ -16,25 +16,20 @@ import org.slf4j.Logger;
  * Created by Leo on 21.06.2017.
  */
 
-public class voiceCommandRequestHandler extends FrontendAPIRequestHandler {
+public class movementDetectRequestHandler extends FrontendAPIRequestHandler {
 
     private Logger LOGGER;
-    public voiceCommander voice;
+    public Movement movement;
     private StorageAPI storageAPI;
+    private DeviceAPI deviceAPI;
+    private EnvironmentAPI environmentAPI;
 
-
-    public voiceCommandRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI, StorageAPI storageAPI) {
+    public movementDetectRequestHandler(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI, StorageAPI storageAPI) {
         this.storageAPI = storageAPI;
         this.LOGGER = LOGGER;
-        voice = new voiceCommander(LOGGER, deviceAPI, environmentAPI);
-    }
-
-    public voiceCommander getVoice() {
-        return voice;
-    }
-
-    public void setVoice(voiceCommander voice) {
-        this.voice = voice;
+        this.deviceAPI = deviceAPI;
+        this.environmentAPI = environmentAPI;
+        movement = new Movement(LOGGER, deviceAPI, environmentAPI);
     }
 
     @Override
@@ -42,7 +37,7 @@ public class voiceCommandRequestHandler extends FrontendAPIRequestHandler {
         boolean value = true;
 
         try {
-            value = storageAPI.loadBoolean("recognition");
+            value = storageAPI.loadBoolean("movement");
             LOGGER.info(Boolean.toString(value));
         } catch (StorageAPIException e) {
             e.printStackTrace();
@@ -52,19 +47,19 @@ public class voiceCommandRequestHandler extends FrontendAPIRequestHandler {
         if (!value) {
             try {
                 LOGGER.info(Boolean.toString(true));
-                storageAPI.saveBoolean("recognition", true);
+                storageAPI.saveBoolean("movement", true);
             } catch (StorageAPIException e) {
                 e.printStackTrace();
             }
-            voice.executeVoiceCommand();
+            movement.detectMovement();
         } else {
             try {
                 LOGGER.info(Boolean.toString(false));
-                storageAPI.saveBoolean("recognition", false);
+                storageAPI.saveBoolean("movement", false);
             } catch (StorageAPIException e) {
                 e.printStackTrace();
             }
-            voice.stopRecognition();
+            movement.stopDetecting();
         }
 
         final JSONObject response = new JSONObject();

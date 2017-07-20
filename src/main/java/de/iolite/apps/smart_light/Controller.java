@@ -85,7 +85,7 @@ public final class Controller extends AbstractIOLITEApp {
      */
     private Disposeable disposeableAssets;
     DeviceLogger dLogger = new DeviceLogger(LOGGER);
-    Movement movement = new Movement();
+    Movement2 movement = new Movement2();
     AutoMode autoMode = new AutoMode();
     protected static List<Location> rooms;
     private processHttp processHttp = new processHttp();
@@ -199,8 +199,7 @@ public final class Controller extends AbstractIOLITEApp {
         LOGGER.debug("Started");
         movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
         autoMode.activateAutopilot(LOGGER, deviceAPI, environmentAPI);
-/*		speechThreadshouldStart = true;
-        executeVoiceCommand();*/
+
     }
 
     /**
@@ -351,7 +350,8 @@ public final class Controller extends AbstractIOLITEApp {
         this.frontendAPI.registerRequestHandler("changeAllLights", new changeAllLightsRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI, voicer.voice));
         this.frontendAPI.registerRequestHandler("changeSettings", new changeSettingsOfLightRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
         this.frontendAPI.registerRequestHandler("changeLightmode", new changeLightmodeRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
-
+        this.frontendAPI.registerRequestHandler("startDetect", new movementDetectRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
+        ;
 
         this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());
     }
@@ -366,62 +366,5 @@ public final class Controller extends AbstractIOLITEApp {
             throw new InitializeFailedException("Loading templates for the dummy app failed", e);
         }
     }
-
-//	protected Runnable startSpeechThread() {
-//		class speechThread implements Runnable {
-//   
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-//				try {
-//					
-//					LOGGER.debug("INFO", "You can start to speak...\n");
-//
-//					while (speechThreadshouldStart) {
-//						/*
-//						 * This method will return when the end of speech is
-//						 * reached.
-//						 */
-//						SpeechResult speechResult = recognizer.getResult();
-//						if (speechResult != null) {
-//
-//							speech = speechResult.getHypothesis();
-//							LOGGER.debug("You said: [" + speech + "]\n");
-//							processSpeech(speech);
-//
-//							speech = null;
-//							speechResult = null;
-//							scheduler.wait(3000);
-//
-//						} else
-//							LOGGER.debug("INFO", "I can't understand what you said.\n");
-//
-//					}
-//					if(speechThreadShouldEnd){
-//						recognizer.stopRecognition();
-//					
-//						speechThreadshouldStart = false;
-//					}
-//					
-//				} catch (Exception ex) {
-//					LOGGER.debug("WARNING", null, ex);
-//					try{
-//						recognizer.stopRecognition();
-//					}
-//					catch(Exception e){
-//						LOGGER.debug("ERROR",e.getMessage().toString());
-//					}
-//	
-//				}
-//
-//				LOGGER.debug("INFO", "SpeechThread has exited...");
-//				
-//
-//			}
-//
-//		}
-//		return new speechThread();
-//
-//	}
 
 }
