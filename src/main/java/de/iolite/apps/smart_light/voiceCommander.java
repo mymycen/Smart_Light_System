@@ -26,412 +26,413 @@ import java.util.Timer;
  */
 public class voiceCommander {
 
-	private Logger LOGGER;
-	private DeviceAPI deviceAPI;
-	private EnvironmentAPI environmentAPI;
-	private LiveSpeechRecognizer recognizer;
-	private String speech;
-	private static List<Location> rooms;
+    private Logger LOGGER;
+    private DeviceAPI deviceAPI;
+    private EnvironmentAPI environmentAPI;
+    private LiveSpeechRecognizer recognizer;
+    private String speech;
+    private static List<Location> rooms;
 
-//	static boolean isLightTurnedon = false;
-//	static boolean isLightTurnedoff = false;
-//	static boolean isLightModeChanged = false;
-	static boolean isCommandExecuted = false;
-	static boolean isPartyModeOn = false;
-	private boolean started = false;
-	private boolean stopped = true;
-	private boolean speechThreadshouldStart = true;
-	private boolean speechThreadShouldEnd = false;
-	private PlaySound playSound = new PlaySound();
-	private static String currentLocation = "root";
-	private Timer timer1;
-	private Timer timer2;
-	private Timer timer3;
-	private Timer timer4;
+    static boolean isLightTurnedon = false;
+    static boolean isLightTurnedoff = false;
+    static boolean isLightModeChanged = false;
+    static boolean isPartyModeOn = false;
+    private boolean started = false;
+    private boolean stopped = true;
+    private boolean speechThreadShouldEnd = true;
+    private PlaySound playSound = new PlaySound();
+    private static String currentLocation = "root";
+    private Timer timer1;
+    private Timer timer2;
+    private Timer timer3;
+    private Timer timer4;
 
-	public enum Commands {
-		TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING, DARKER, BRIGHTER, MAX_BRIGHTNESS, MIN_BRIGHTNESS
-	};
+    public enum Commands {
+        TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING
+    }
 
-	public voiceCommander(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
-		this.LOGGER = LOGGER;
-		this.deviceAPI = deviceAPI;
-		this.environmentAPI = environmentAPI;
-		rooms = environmentAPI.getLocations();
+    ;
 
-		
-	}
+    public voiceCommander(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
+        this.LOGGER = LOGGER;
+        this.deviceAPI = deviceAPI;
+        this.environmentAPI = environmentAPI;
+        rooms = environmentAPI.getLocations();
 
-	public void stopRecognition() {
-		speechThreadShouldEnd = false;
-		if (recognizer != null)
-			recognizer.stopRecognition();
-	}
+        // Configuration
 
-	public void executeVoiceCommand() {
-		// voice recognizer configuration
+    }
 
-		Configuration configuration = new Configuration();
-		configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
-		configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
-		configuration.setGrammarPath("resource:/assets/grammars");
-		configuration.setGrammarName("grammar");
-		configuration.setUseGrammar(true);
-		try {
-			recognizer = new LiveSpeechRecognizer(configuration);
-			LOGGER.info("VOICE RECOGNIZER CREATED");
-		} catch (Exception ex) {
-			LOGGER.debug("PROBLEM" + ex.getMessage());
-		}
-		recognizer.startRecognition(true);
-		try {
-			LOGGER.debug("You can start to speak...\n");
-			while (speechThreadshouldStart) {
-				/*
-				 * This method will return when the end of speech is reached.
+    public void stopRecognition() {
+        speechThreadShouldEnd = false;
+        LOGGER.info("SHIT`1");
+        if (recognizer != null)
+            recognizer.stopRecognition();
+    }
+
+    public void executeVoiceCommand() {
+
+        Configuration configuration = new Configuration();
+        configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
+        configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
+        configuration.setGrammarPath("resource:/assets/grammars");
+        configuration.setGrammarName("grammar");
+        configuration.setUseGrammar(true);
+        try {
+            recognizer = new LiveSpeechRecognizer(configuration);
+        } catch (Exception ex) {
+            LOGGER.debug("PROBLEM" + ex.getMessage());
+        }
+        recognizer.startRecognition(true);
+        try {
+            LOGGER.debug("You can start to speak...\n");
+            while (speechThreadShouldEnd) {
+                if (!speechThreadShouldEnd) {
+                    LOGGER.info("FUCK ME");
+                }
+                /*
+                 * This method will return when the end of speech is reached.
 				 */
-				if (recognizer != null) {
-					SpeechResult speechResult = recognizer.getResult();
-
-					if (speechResult != null) {
-
-						speech = speechResult.getHypothesis();
-						LOGGER.debug("You said: [" + speech + "]\n");
-						processSpeech(speech);
-
-						speech = null;
-						speechResult = null;
-						// scheduler.wait(3000);
-
-					} else
-						LOGGER.debug("INFO", "I can't understand what you said.\n");
-
-				}
-			}
-
-		} catch (Exception ex) {
-			LOGGER.debug("WARNING", null, ex);
-			try {
-				if (recognizer != null)
-					recognizer.stopRecognition();
-			} catch (Exception e) {
-				LOGGER.debug("ERROR", e.getMessage().toString());
-			}
-
-		}
-
-	}
-
-	public void processSpeech(String result) throws DeviceAPIException, InterruptedException {
-
-		if (result != null && result.toLowerCase().contains("alice")) {
-			started = true;
-			stopped = false;
-			playSound.playMp3(voiceCommander.Commands.READY.toString());
-
-		} else if (result != null && result.toLowerCase().contains("stop")) {
-			stopped = true;
-			started = false;
-
-		} else if (result != null && started == true && result.toLowerCase().contains("to")
-				&& result.toLowerCase().contains("root")) {
-			stopped = true;
-			started = false;
-
-			currentLocation = "root";
-			playSound.playMp3(voiceCommander.Commands.TO_ROOT.toString());
-
-		} else if (result != null && started == true && result.toLowerCase().contains("living room")) {
-			stopped = true;
-			started = false;
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(voiceCommander.Commands.TO_LIVINGROOM.toString());
-
-				}
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("bedroom")) {
-			stopped = true;
-			started = false;
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(voiceCommander.Commands.TO_BEDROOM.toString());
-
-				}
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("kitchen")) {
-			stopped = true;
-			started = false;
-
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(voiceCommander.Commands.TO_KITCHEN.toString());
-
-				}
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("office")) {
-			stopped = true;
-			started = false;
-			for (int x = 0; x < rooms.size(); x++) {
-				if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
-					currentLocation = rooms.get(x).getName();
-					playSound.playMp3(voiceCommander.Commands.TO_OFFICE.toString());
-
-				}
-
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("light")
-				&& result.toLowerCase().contains("on")) {
-			stopped = true;
-			started = false;
-			if (isPartyModeOn == true) {
-				stopPartyMode();
-				isPartyModeOn = false;
-			}
-
-			for (Location location : rooms) {
-				if (location.getName().equals(currentLocation)) {
-					List<Device> devices = location.getDevices();
-
-					for (de.iolite.app.api.environment.Device device : devices) {
-						String deviceIdentifier = device.getIdentifier();
-						for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
-							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
-								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-									final DeviceBooleanProperty onProperty = deviceControl
-											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									if (onProperty.getValue() == false) {
-										onProperty.requestValueUpdate(true);
-										onProperty
-												.setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
-
-													@Override
-													public void valueChanged(Boolean arg0) {
-														// TODO Auto-generated
-														// method
-														// stub
-														isCommandExecuted = true;
-
-													}
-
-													@Override
-													public void keyChanged(String arg0) {
-														// TODO Auto-generated
-														// method
-														// stub
-
-													}
-
-													@Override
-													public void deviceChanged(
-															de.iolite.app.api.device.access.Device arg0) {
-														// TODO Auto-generated
-														// method
-														// stub
-
-													}
-												});
-
-									}
-								}
-							}
-						}
-					}
-
-				}
-
-			}
-
-			if (currentLocation.equals("root")) {
-
-				for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
-
-					if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-						final DeviceBooleanProperty onProperty = deviceControl
-								.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-						if (onProperty.getValue() == false) {
-							onProperty.requestValueUpdate(true);
-							onProperty.setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
-
-								@Override
-								public void valueChanged(Boolean arg0) {
-									// TODO Auto-generated method stub
-									isCommandExecuted = true;
-
-								}
-
-								@Override
-								public void keyChanged(String arg0) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
-									// TODO Auto-generated method stub
-
-								}
-							});
-
-						}
-					}
-				}
-
-			}
-			if (isCommandExecuted = true) {
-				playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_ON.toString());
-				isCommandExecuted = false;
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("light")
-				&& result.toLowerCase().contains("off")) {
-			stopped = true;
-			started = false;
-			if (isPartyModeOn == true) {
-				stopPartyMode();
-				isPartyModeOn = false;
-			}
-			for (Location location : rooms) {
-				if (location.getName().equals(currentLocation)) {
-					List<de.iolite.app.api.environment.Device> devices = location.getDevices();
-
-					for (de.iolite.app.api.environment.Device device : devices) {
-						String deviceIdentifier = device.getIdentifier();
-						for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
-							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
-								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-									final DeviceBooleanProperty onProperty = deviceControl
-											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									if (onProperty.getValue() == true) {
-										onProperty.requestValueUpdate(false);
-										onProperty
-												.setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
-
-													@Override
-													public void valueChanged(Boolean arg0) {
-														// TODO Auto-generated
-														// method
-														// stub
-														isCommandExecuted = true;
-
-													}
-
-													@Override
-													public void keyChanged(String arg0) {
-														// TODO Auto-generated
-														// method
-														// stub
-
-													}
-
-													@Override
-													public void deviceChanged(
-															de.iolite.app.api.device.access.Device arg0) {
-														// TODO Auto-generated
-														// method
-														// stub
-
-													}
-												});
-
-									}
-								}
-							}
-						}
-					}
-
-				}
-
-			}
-
-			if (currentLocation.equals("root")) {
-
-				for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
-
-					if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
-							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
-						final DeviceBooleanProperty onProperty = deviceControl
-								.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-						if (onProperty.getValue() == true) {
-							onProperty.requestValueUpdate(false);
-							onProperty.setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
-
-								@Override
-								public void valueChanged(Boolean arg0) {
-									// TODO Auto-generated method stub
-									isCommandExecuted = true;
-
-								}
-
-								@Override
-								public void keyChanged(String arg0) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
-									// TODO Auto-generated method stub
-
-								}
-							});
-
-						}
-					}
-				}
-
-			}
-			if (isCommandExecuted = true) {
-				playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_OFF.toString());
-				isCommandExecuted = false;
-			}
-
-		} else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
-
-			started = false;
-			stopped = true;
-			if (isPartyModeOn == true) {
-				stopPartyMode();
-				isPartyModeOn = false;
-			}
-
-			for (Location location : rooms) {
-				if (location.getName().equals(currentLocation)) {
-					List<de.iolite.app.api.environment.Device> devices = location.getDevices();
-
-					for (de.iolite.app.api.environment.Device device : devices) {
-						String deviceIdentifier = device.getIdentifier();
-						for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
-
-							if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
-								if (deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
-									// final DeviceBooleanProperty onProperty =
-									// deviceControl
-									// .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									final DeviceBooleanProperty onProperty = deviceControl
-											.getBooleanProperty(DriverConstants.PROPERTY_on_ID);
-									if (onProperty.getValue() == false) {
-										onProperty.requestValueUpdate(true);
-
-									}
-									final DeviceIntegerProperty dimmingLevel = deviceControl
-											.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
-
-									dimmingLevel.requestValueUpdate(Controller.romaticMode.getDimmLevel());
+                if (recognizer != null) {
+                    SpeechResult speechResult = recognizer.getResult();
+
+                    if (speechResult != null) {
+
+                        speech = speechResult.getHypothesis();
+                        LOGGER.debug("You said: [" + speech + "]\n");
+                        processSpeech(speech);
+
+                        speech = null;
+                        speechResult = null;
+                        // scheduler.wait(3000);
+
+                    } else
+                        LOGGER.debug("INFO", "I can't understand what you said.\n");
+
+                }
+            }
+
+        } catch (Exception ex) {
+            LOGGER.debug("WARNING", null, ex);
+            try {
+                if (recognizer != null)
+                    recognizer.stopRecognition();
+            } catch (Exception e) {
+                LOGGER.debug("ERROR", e.getMessage().toString());
+            }
+
+        }
+
+    }
+
+    public void processSpeech(String result) throws DeviceAPIException, InterruptedException {
+
+        if (result != null && result.toLowerCase().contains("alice")) {
+            started = true;
+            stopped = false;
+            playSound.playMp3(voiceCommander.Commands.READY.toString());
+
+        } else if (result != null && result.toLowerCase().contains("stop")) {
+            stopped = true;
+            started = false;
+
+        } else if (result != null && started == true && result.toLowerCase().contains("to")
+                && result.toLowerCase().contains("root")) {
+            stopped = true;
+            started = false;
+
+            currentLocation = "root";
+            playSound.playMp3(voiceCommander.Commands.TO_ROOT.toString());
+
+        } else if (result != null && started == true && result.toLowerCase().contains("living room")) {
+            stopped = true;
+            started = false;
+            for (int x = 0; x < rooms.size(); x++) {
+                if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
+                    currentLocation = rooms.get(x).getName();
+                    playSound.playMp3(voiceCommander.Commands.TO_LIVINGROOM.toString());
+
+                }
+            }
+
+        } else if (result != null && started == true && result.toLowerCase().contains("bedroom")) {
+            stopped = true;
+            started = false;
+            for (int x = 0; x < rooms.size(); x++) {
+                if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
+                    currentLocation = rooms.get(x).getName();
+                    playSound.playMp3(voiceCommander.Commands.TO_BEDROOM.toString());
+
+                }
+            }
+
+        } else if (result != null && started == true && result.toLowerCase().contains("kitchen")) {
+            stopped = true;
+            started = false;
+
+            for (int x = 0; x < rooms.size(); x++) {
+                if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
+                    currentLocation = rooms.get(x).getName();
+                    playSound.playMp3(voiceCommander.Commands.TO_KITCHEN.toString());
+
+                }
+            }
+
+        } else if (result != null && started == true && result.toLowerCase().contains("office")) {
+            stopped = true;
+            started = false;
+            for (int x = 0; x < rooms.size(); x++) {
+                if (result.toLowerCase().contains(rooms.get(x).getName().toLowerCase())) {
+                    currentLocation = rooms.get(x).getName();
+                    playSound.playMp3(voiceCommander.Commands.TO_OFFICE.toString());
+
+                }
+
+            }
+
+        } else if (result != null && started == true && result.toLowerCase().contains("light")
+                && result.toLowerCase().contains("on")) {
+            stopped = true;
+            started = false;
+            if (isPartyModeOn == true) {
+                stopPartyMode();
+                isPartyModeOn = false;
+            }
+
+            for (Location location : rooms) {
+                if (location.getName().equals(currentLocation)) {
+                    List<Device> devices = location.getDevices();
+
+                    for (de.iolite.app.api.environment.Device device : devices) {
+                        String deviceIdentifier = device.getIdentifier();
+                        for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+                            if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
+                                if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+                                        || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
+                                        || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
+                                    final DeviceBooleanProperty onProperty = deviceControl
+                                            .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                                    if (onProperty.getValue() == false) {
+                                        onProperty.requestValueUpdate(true);
+                                        onProperty
+                                                .setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
+
+                                                    @Override
+                                                    public void valueChanged(Boolean arg0) {
+                                                        // TODO Auto-generated
+                                                        // method
+                                                        // stub
+                                                        isLightTurnedon = true;
+
+                                                    }
+
+                                                    @Override
+                                                    public void keyChanged(String arg0) {
+                                                        // TODO Auto-generated
+                                                        // method
+                                                        // stub
+
+                                                    }
+
+                                                    @Override
+                                                    public void deviceChanged(
+                                                            de.iolite.app.api.device.access.Device arg0) {
+                                                        // TODO Auto-generated
+                                                        // method
+                                                        // stub
+
+                                                    }
+                                                });
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+            if (currentLocation.equals("root")) {
+
+                for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+
+                    if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+                            || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
+                            || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
+                        final DeviceBooleanProperty onProperty = deviceControl
+                                .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                        if (onProperty.getValue() == false) {
+                            onProperty.requestValueUpdate(true);
+                            onProperty.setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
+
+                                @Override
+                                public void valueChanged(Boolean arg0) {
+                                    // TODO Auto-generated method stub
+                                    isLightTurnedon = true;
+
+                                }
+
+                                @Override
+                                public void keyChanged(String arg0) {
+                                    // TODO Auto-generated method stub
+
+                                }
+
+                                @Override
+                                public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
+                                    // TODO Auto-generated method stub
+
+                                }
+                            });
+
+                        }
+                    }
+                }
+
+            }
+            if (isLightTurnedon = true) {
+                playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_ON.toString());
+            }
+
+        } else if (result != null && started == true && result.toLowerCase().contains("light")
+                && result.toLowerCase().contains("off")) {
+            stopped = true;
+            started = false;
+            if (isPartyModeOn == true) {
+                stopPartyMode();
+                isPartyModeOn = false;
+            }
+            for (Location location : rooms) {
+                if (location.getName().equals(currentLocation)) {
+                    List<de.iolite.app.api.environment.Device> devices = location.getDevices();
+
+                    for (de.iolite.app.api.environment.Device device : devices) {
+                        String deviceIdentifier = device.getIdentifier();
+                        for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+                            if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
+                                if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+                                        || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
+                                        || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
+                                    final DeviceBooleanProperty onProperty = deviceControl
+                                            .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                                    if (onProperty.getValue() == true) {
+                                        onProperty.requestValueUpdate(false);
+                                        onProperty
+                                                .setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
+
+                                                    @Override
+                                                    public void valueChanged(Boolean arg0) {
+                                                        // TODO Auto-generated
+                                                        // method
+                                                        // stub
+                                                        isLightTurnedoff = true;
+
+                                                    }
+
+                                                    @Override
+                                                    public void keyChanged(String arg0) {
+                                                        // TODO Auto-generated
+                                                        // method
+                                                        // stub
+
+                                                    }
+
+                                                    @Override
+                                                    public void deviceChanged(
+                                                            de.iolite.app.api.device.access.Device arg0) {
+                                                        // TODO Auto-generated
+                                                        // method
+                                                        // stub
+
+                                                    }
+                                                });
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+            if (currentLocation.equals("root")) {
+
+                for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+
+                    if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
+                            || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
+                            || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
+                        final DeviceBooleanProperty onProperty = deviceControl
+                                .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                        if (onProperty.getValue() == true) {
+                            onProperty.requestValueUpdate(false);
+                            onProperty.setObserver(new DeviceBooleanProperty.DeviceBooleanPropertyObserver() {
+
+                                @Override
+                                public void valueChanged(Boolean arg0) {
+                                    // TODO Auto-generated method stub
+                                    isLightTurnedoff = true;
+
+                                }
+
+                                @Override
+                                public void keyChanged(String arg0) {
+                                    // TODO Auto-generated method stub
+
+                                }
+
+                                @Override
+                                public void deviceChanged(de.iolite.app.api.device.access.Device arg0) {
+                                    // TODO Auto-generated method stub
+
+                                }
+                            });
+
+                        }
+                    }
+                }
+
+            }
+            if (isLightTurnedoff = true) {
+                playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_OFF.toString());
+            }
+
+        } else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
+
+            started = false;
+            stopped = true;
+            if (isPartyModeOn == true) {
+                stopPartyMode();
+                isPartyModeOn = false;
+            }
+
+            for (Location location : rooms) {
+                if (location.getName().equals(currentLocation)) {
+                    List<de.iolite.app.api.environment.Device> devices = location.getDevices();
+
+                    for (de.iolite.app.api.environment.Device device : devices) {
+                        String deviceIdentifier = device.getIdentifier();
+                        for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
+
+                            if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
+                                if (deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
+                                    // final DeviceBooleanProperty onProperty =
+                                    // deviceControl
+                                    // .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                                    final DeviceBooleanProperty onProperty = deviceControl
+                                            .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
+                                    if (onProperty.getValue() == false) {
+                                        onProperty.requestValueUpdate(true);
+
+                                    }
+                                    final DeviceIntegerProperty dimmingLevel = deviceControl
+                                            .getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
+
+                                    dimmingLevel.requestValueUpdate(Controller.romaticMode.getDimmLevel());
 
 									final DeviceDoubleProperty hue = deviceControl
 											.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_hue_ID);
