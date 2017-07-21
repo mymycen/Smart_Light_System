@@ -30,6 +30,10 @@
             startDetect();
         });
 
+        $('#toggle-four').change(function () {
+            startAuto();
+        });
+
 
         $http.get('getStatus').then(function onSuccess(response) {
             console.debug("fetchig status was successfull");
@@ -85,6 +89,15 @@
 
         var startVoice = function () {
             $http.post('startVoice').then(function onSuccess(response) {
+                console.debug("successfully changed voice recognition");
+                $scope.value = response.data.value;
+            }, function onFailure(response) {
+                console.error("problem changing voice recognition" + response.toString());
+            });
+        };
+
+        var startAuto = function () {
+            $http.post('startAuto').then(function onSuccess(response) {
                 console.debug("successfully changed voice recognition");
                 $scope.value = response.data.value;
             }, function onFailure(response) {

@@ -17,9 +17,30 @@ public class AutoMode {
 
     //public LightMode hot = new LightMode (1,100,85,"hot");
     //public LightMode cool = new LightMode (208,100,85,"cool");
+    private Logger LOGGER;
+    private DeviceAPI deviceAPI;
+    private EnvironmentAPI environmentAPI;
+
+    public AutoMode(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
+        this.deviceAPI = deviceAPI;
+        this.LOGGER = LOGGER;
+        this.environmentAPI = environmentAPI;
+    }
+
+    public void stopAutopilot() {
+        List<Device> deviceList = deviceAPI.getDevices();
+        for (Device device : deviceList) {
+            if (device.getProfileIdentifier().equals("http://iolite.de#MovementSensor")) {
+                DeviceBooleanProperty onProperty = device.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_MovementSensor_movementDetected_ID);
+                if (onProperty != null) {
+                    onProperty.setObserver(null);
+                }
+            }
+        }
+    }
 
 
-    public void activateAutopilot(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
+    public void activateAutopilot() {
 
         DeviceLogger dLogger = new DeviceLogger(LOGGER);
         deviceAPI.setObserver(dLogger.new DeviceAddAndRemoveLogger());
