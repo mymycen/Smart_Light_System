@@ -6,7 +6,7 @@
     /**
      * This controller calls 'rooms' and 'devices' request handlers which are registered in the ExampleApp.java.
      */
-    SmartLightApp.controller('ExampleController1', ['$scope', '$http', function ($scope, $http) {
+    SmartLightApp.controller('startController', ['$scope', '$http', function ($scope, $http) {
         $scope.rooms = [];
         $scope.devices = [];
         $scope.modes = [];
@@ -14,9 +14,9 @@
         $scope.dimmLevel = 100;
         $scope.selectedMode = "romantic";
 
-        $scope.apartement = {"name": "Whole Apartement", "identifier": "apartement"};
+        $scope.apartement = {"name": "Whole apartement", "identifier": "apartement"};
 
-        $scope.selected = {"name": "Whole Apartement", "identifier": "apartement"};
+        $scope.selected = {"name": "Whole apartement", "identifier": "apartement"};
 
         $('#toggle-two').change(function () {
             startVoice();

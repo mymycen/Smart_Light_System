@@ -1,101 +1,30 @@
 <div class="example-container">
-    <div class="example-row" ng-controller="ExampleController1">
-
-        <div class="example-title">Rooms</div>
-        <div class="row">
-            <div class="col-lg-4 col-xs-12 col-md-6">
-                <div class="row roomrow">
-                    <div ng-repeat="room in rooms">
-                        <a href="#" class="roomDiv thumbnail" ng-click="setSelected(room)">
-                            <div class="img-container">
-                                <div class="positioning">
-                                    <span ng-bind="room.name"></span>
-                                </div>
-                                <div class="positioningLamp" ng-repeat="device in room.devices">
-                                    <i class="fa fa-lightbulb-o" aria-hidden="true"> - {{device.name}}</i>
-                                </div>
-                                <img ng-src="img/roomtemplate.png"/>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+    <div class="example-row" ng-controller="configController">
+        <div class="col-lg-6 col-xs-12 col-md-6">
+            <h3>Select a mode :</h3>
+            <div class="list-group">
+                <button type="button" class="list-group-item" ng-click="setSelected(partymode)"
+                        ng-bind="partymode.name"></button>
+                <button type="button" class="list-group-item" ng-click="setSelected(mode)" ng-repeat="mode in modes"
+                        ng-bind="mode.name"></button>
             </div>
-            <div class="buttonrow col-lg-4 col-xs-12 col-md-6">
-                <div class="row">
-                    <h3 ng-bind="'Selected area : ' + selected.name"></h3>
-                </div>
-
-                <div class="row">
-                    <h5>Pick a color :</h5>
-                    <div class="colorpickerCSS" id="cp7"></div>
-                    <div class="exchangeDiv">
-                    </div>
-                    <h5>Change the density :</h5>
-                    <input id="densitySlider" data-slider-id='ex1Slider' type="text"
-                           data-slider-min="0"
-                           data-slider-max="100"
-                           data-slider-step="1" data-slider-value="100"/>
-                    <button class="btn btn-primary btn-large" ng-click="sendSettings()">Load settings</button>
-
-                </div>
-                <div class="row">
-                    <div class="form-group">
-                        <label for="sel1">Select a lightmode :</label>
-                        <select class="form-control" id="sel1" ng-model="selectedMode">
-                            <option>Party</option>
-                            <option ng-repeat="mode in modes">{{mode.name}}</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary btn-large" ng-click="sendLightmode()">Load lightmode</button>
-
-                </div>
-            </div>
-            <div class="buttonrow col-lg-4 col-xs-12 col-md-6">
-                <div class="row">
-                    <h3>Global settings :</h3>
-                </div>
-                <div class="row">
-                    <label class="col-lg-6 col-xs-6 col-md-6">All lights</label>
-                    <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-one" data-toggle="toggle">
-                    </label>
-                </div>
-                <div class="row">
-                    <label class="col-lg-6 col-xs-6 col-md-6">Voice recognition</label>
-                    <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-two" data-toggle="toggle">
-                    </label>
-                </div>
-                <div class="row">
-                    <label class="col-lg-6 col-xs-6 col-md-6">Movement detection</label>
-                    <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-three" data-toggle="toggle">
-                    </label>
-                </div>
-                <div class="row">
-                    <label class="col-lg-6 col-xs-6 col-md-6">"God" mode</label>
-                    <label class="col-lg-6 col-xs-6 col-md-6">
-                        <input type="checkbox" id="toggle-four" data-toggle="toggle">
-                    </label>
-                </div>
+        </div>
+        <div class="col-lg-6 col-xs-12 col-md-6">
+            <div class="row">
+                <h3 ng-bind="'Selected mode : ' + selected.name"></h3>
+                <h5>Pick a color :</h5>
+                <div class="colorpickerCSS" id="cp7"></div>
+                <button class="btn btn-primary btn-large pull-right" ng-click="sendSettings()">Save lightmode
+                </button>
             </div>
         </div>
         <script>
             $(function () {
-                $('#toggle-one').bootstrapToggle();
-                $('#toggle-two').bootstrapToggle({});
-                $('#toggle-three').bootstrapToggle();
-                $('#toggle-four').bootstrapToggle();
                 $('#cp7').colorpicker({
                     color: '#ffffff',
                     format: 'rgb',
                     container: true,
                     inline: true
-                });
-                $('#densitySlider').slider({
-                    formatter: function (value) {
-                        return 'Current value: ' + value;
-                    }
                 });
             });
         </script>

@@ -2,7 +2,7 @@
     'use strict';
 
     // depends on ngSanitize
-    var SmartLightApp = angular.module('SmartLightApp', ['ngSanitize']);
+    var SmartLightApp = angular.module('SmartLightApp', ['ngSanitize', 'ngRoute']);
 
     // configuration
     SmartLightApp.config(['$provide', '$httpProvider', function ($provide, $httpProvider) {
@@ -35,7 +35,20 @@
 
         // to avoid Bad Request in Firefox, add manually X-Requested-With header
         $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
     }]);
+
+    SmartLightApp.config(function ($routeProvider) {
+        $routeProvider
+            .when("/", {
+                templateUrl: "content.tpl.html",
+                controller: "startController"
+            })
+            .when("/configure", {
+                templateUrl: "configureMode.html",
+                controller: "configController"
+            });
+    });
 
     SmartLightApp.run(function () {
         // empty

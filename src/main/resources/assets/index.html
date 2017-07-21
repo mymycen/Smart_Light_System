@@ -54,6 +54,8 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script src="js/bootstrap-colorpicker.js"></script>
     <script src="js/bootstrap-slider.js"></script>
+    <script src="js/angular-route.js"></script>
+
 
     <!--    <script>
             "use strict";
@@ -86,11 +88,13 @@
 <body>
 <!-- include the content template -->
 <div ng-include="'header.tpl.html'"></div>
-<div ng-include="'content.tpl.html'"></div>
+
+<div ng-view></div>
 
 <!-- load our angular modules/controllers/services/.. -->
 <script type="text/javascript" src="app/SmartLightApp.js"></script>
 <script type="text/javascript" src="app/SmartLightController.js"></script>
+<script type="text/javascript" src="app/configController.js"></script>
 <script type="text/javascript" src="app/navbarController.js"></script>
 <script type="text/javascript" src="app/deviceDirective.js"></script>
 </body>
