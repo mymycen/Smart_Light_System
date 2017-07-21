@@ -351,7 +351,8 @@ public final class Controller extends AbstractIOLITEApp {
         this.frontendAPI.registerRequestHandler("changeSettings", new changeSettingsOfLightRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
         this.frontendAPI.registerRequestHandler("changeLightmode", new changeLightmodeRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
         this.frontendAPI.registerRequestHandler("startDetect", new movementDetectRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
-        ;
+        this.frontendAPI.registerRequestHandler("configureLightmode", new configureRequestHandler(LOGGER, voicer.voice));
+
 
         this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());
     }

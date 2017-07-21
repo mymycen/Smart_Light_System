@@ -3,6 +3,8 @@
         <div class="col-lg-6 col-xs-12 col-md-6">
             <h3>Select a mode :</h3>
             <div class="list-group">
+                <button type="button" class="list-group-item" ng-click="setSelected(partymode)"
+                        ng-bind="partymode.name"></button>
                 <button type="button" class="list-group-item" ng-click="setSelected(mode)" ng-repeat="mode in modes"
                         ng-bind="mode.name"></button>
             </div>
