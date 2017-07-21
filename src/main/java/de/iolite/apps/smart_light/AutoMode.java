@@ -1,7 +1,6 @@
 package de.iolite.apps.smart_light;
 
 
-import de.iolite.api.IOLITEAPINotResolvableException;
 import de.iolite.api.IOLITEAPIProvider;
 import de.iolite.api.IOLITEPermissionDeniedException;
 import de.iolite.api.heating.access.HeatingAPI;

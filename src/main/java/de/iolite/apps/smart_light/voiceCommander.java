@@ -40,10 +40,10 @@ public class voiceCommander {
     private boolean speechThreadShouldEnd = true;
     private PlaySound playSound = new PlaySound();
     private static String currentLocation = "root";
-    private Timer timer1;
-    private Timer timer2;
-    private Timer timer3;
-    private Timer timer4;
+    public Timer timer1;
+    public Timer timer2;
+    public Timer timer3;
+    public Timer timer4;
 
     public enum Commands {
         TO_ROOT, TO_LIVINGROOM, TO_KITCHEN, TO_OFFICE, TO_BEDROOM, TURN_LIGHT_ON, TURN_LIGHT_OFF, READY, ROMANTIC, PARTY, SLEEPING, MOVIE, WORKING, BRIGHTER, DARKER, MAX_BRIGHTNESS, MIN_BRIGHTNESS
@@ -206,7 +206,6 @@ public class voiceCommander {
                         for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
                             if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
                                 if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-                                        || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
                                         || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
                                     final DeviceBooleanProperty onProperty = deviceControl
                                             .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
@@ -244,6 +243,14 @@ public class voiceCommander {
 
                                     }
                                 }
+                                
+                                else if(deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")){
+                                	final DeviceBooleanProperty onProperty = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_on_ID);
+                                	if (onProperty.getValue() == false) 
+                                        onProperty.requestValueUpdate(true);
+                                	final DeviceIntegerProperty dimmingLevel = deviceControl.getIntegerProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_dimmingLevel_ID);
+                                	dimmingLevel.requestValueUpdate(100);
+                                }
                             }
                         }
                     }
@@ -257,7 +264,6 @@ public class voiceCommander {
                 for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
 
                     if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-                            || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
                             || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
                         final DeviceBooleanProperty onProperty = deviceControl
                                 .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
@@ -287,6 +293,15 @@ public class voiceCommander {
 
                         }
                     }
+                    else if(deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")){
+                    	final DeviceBooleanProperty onProperty = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_on_ID);
+                    	if (onProperty.getValue() == false) 
+                            onProperty.requestValueUpdate(true);
+                    	final DeviceIntegerProperty dimmingLevel = deviceControl.getIntegerProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_dimmingLevel_ID);
+                    	dimmingLevel.requestValueUpdate(100);
+                    }
+                    
+                    
                 }
 
             }
@@ -312,7 +327,6 @@ public class voiceCommander {
                         for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
                             if (deviceControl.getIdentifier().equals(deviceIdentifier)) {
                                 if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-                                        || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
                                         || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
                                     final DeviceBooleanProperty onProperty = deviceControl
                                             .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
@@ -350,6 +364,14 @@ public class voiceCommander {
 
                                     }
                                 }
+                                else if(deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")){
+                                	final DeviceBooleanProperty onProperty = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_on_ID);
+                                	if (onProperty.getValue() == true) 
+                                        onProperty.requestValueUpdate(false);
+                                	
+                                	final DeviceIntegerProperty dimmingLevel = deviceControl.getIntegerProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_dimmingLevel_ID);
+                                	dimmingLevel.requestValueUpdate(0);
+                                }
                             }
                         }
                     }
@@ -363,7 +385,6 @@ public class voiceCommander {
                 for (de.iolite.app.api.device.access.Device deviceControl : deviceAPI.getDevices()) {
 
                     if (deviceControl.getProfileIdentifier().equals("http://iolite.de#DimmableLamp")
-                            || deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")
                             || deviceControl.getProfileIdentifier().equals("http://iolite.de#Lamp")) {
                         final DeviceBooleanProperty onProperty = deviceControl
                                 .getBooleanProperty(DriverConstants.PROPERTY_on_ID);
@@ -392,6 +413,14 @@ public class voiceCommander {
                             });
 
                         }
+                    }
+                    else if(deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")){
+                    	final DeviceBooleanProperty onProperty = deviceControl.getBooleanProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_on_ID);
+                    	if (onProperty.getValue() == true) 
+                            onProperty.requestValueUpdate(false);
+                    	
+                    	final DeviceIntegerProperty dimmingLevel = deviceControl.getIntegerProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_dimmingLevel_ID);
+                    	dimmingLevel.requestValueUpdate(0);
                     }
                 }
 
@@ -1038,6 +1067,7 @@ public class voiceCommander {
 				&& result.toLowerCase().contains("brighter")) {
 			stopped = true;
 			started = false;
+			int newDimmLevel = 0;
 			if (isPartyModeOn == true) {
 				stopPartyMode();
 				isPartyModeOn = false;
@@ -1055,7 +1085,7 @@ public class voiceCommander {
 										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
 									final DeviceIntegerProperty onProperty = deviceControl
 											.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
-									int newDimmLevel = onProperty.getValue() +20;
+									newDimmLevel = onProperty.getValue() +20;
 									if(newDimmLevel <= 100){
 										onProperty.requestValueUpdate(newDimmLevel);
 										onProperty.setObserver(new DeviceIntegerPropertyObserver() {
@@ -1081,7 +1111,7 @@ public class voiceCommander {
 									}
 									else{
 										onProperty.requestValueUpdate(100);
-										playSound.playMp3(voiceCommander.Commands.MAX_BRIGHTNESS.toString());
+										
 									}
 								}
 							}
@@ -1100,7 +1130,7 @@ public class voiceCommander {
 							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
 						final DeviceIntegerProperty onProperty = deviceControl
 								.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
-						int newDimmLevel = onProperty.getValue() +20;
+						newDimmLevel = onProperty.getValue() +20;
 						if(newDimmLevel <= 100){
 							onProperty.requestValueUpdate(newDimmLevel);
 							onProperty.setObserver(new DeviceIntegerPropertyObserver() {
@@ -1127,14 +1157,19 @@ public class voiceCommander {
 						}
 						else{
 							onProperty.requestValueUpdate(100);
-							playSound.playMp3(voiceCommander.Commands.MAX_BRIGHTNESS.toString());
+							
 						}
 					}
 				}
 
 			}
-			if (isCommandExecuted = true) {
+		
+			if(newDimmLevel >100 ){
+				playSound.playMp3(voiceCommander.Commands.MAX_BRIGHTNESS.toString());
+			}
+			else if(isCommandExecuted = true){
 				playSound.playMp3(voiceCommander.Commands.BRIGHTER.toString());
+				isCommandExecuted = false;
 			}
 
 		}
@@ -1142,6 +1177,7 @@ public class voiceCommander {
 				&& result.toLowerCase().contains("darker")) {
 			stopped = true;
 			started = false;
+			int newDimmLevel = 0;
 			if (isPartyModeOn == true) {
 				stopPartyMode();
 				isPartyModeOn = false;
@@ -1159,7 +1195,7 @@ public class voiceCommander {
 										|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
 									final DeviceIntegerProperty onProperty = deviceControl
 											.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
-									int newDimmLevel = onProperty.getValue() - 20;
+									newDimmLevel = onProperty.getValue() - 20;
 									if(newDimmLevel >= 1){
 										onProperty.requestValueUpdate(newDimmLevel);
 										onProperty.setObserver(new DeviceIntegerPropertyObserver() {
@@ -1185,7 +1221,7 @@ public class voiceCommander {
 									}
 									else{
 										onProperty.requestValueUpdate(1);
-										playSound.playMp3(voiceCommander.Commands.MIN_BRIGHTNESS.toString());
+									
 									}
 								}
 							}
@@ -1204,7 +1240,7 @@ public class voiceCommander {
 							|| deviceControl.getProfileIdentifier().equals("http://iolite.de#HSVLamp")) {
 						final DeviceIntegerProperty onProperty = deviceControl
 								.getIntegerProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
-						int newDimmLevel = onProperty.getValue() - 20;
+						newDimmLevel = onProperty.getValue() - 20;
 						if(newDimmLevel >= 1){
 							onProperty.requestValueUpdate(newDimmLevel);
 							onProperty.setObserver(new DeviceIntegerPropertyObserver() {
@@ -1231,21 +1267,27 @@ public class voiceCommander {
 						}
 						else{
 							onProperty.requestValueUpdate(1);
-							playSound.playMp3(voiceCommander.Commands.MIN_BRIGHTNESS.toString());
+							
 						}
 					}
 				}
 
 			}
-			if (isCommandExecuted = true) {
-				playSound.playMp3(voiceCommander.Commands.DARKER.toString());
+			
+			if(newDimmLevel<1){
+				playSound.playMp3(voiceCommander.Commands.MIN_BRIGHTNESS.toString());
 			}
+			else if(isCommandExecuted = true){
+				playSound.playMp3(voiceCommander.Commands.DARKER.toString());
+				isCommandExecuted = false;
+			}
+			
 
 		}
 
 	}
 
-	private class runPartyLight extends TimerTask {
+	public class runPartyLight extends TimerTask {
 		int dimmingLevel;
 		double hue;
 		double saturation;
@@ -1408,7 +1450,7 @@ public class voiceCommander {
 
 	}
 
-	private void stopPartyMode() throws InterruptedException {
+	public void stopPartyMode() throws InterruptedException {
 		if (timer1 != null) {
 			timer1.cancel();
 			timer1.purge();
@@ -1429,10 +1471,7 @@ public class voiceCommander {
 			timer4.purge();
 			timer4 = null;
 		}
-		
-		
-		
-		
+		isPartyModeOn = false;
 
 		LOGGER.debug("Party Mode is Off");
 

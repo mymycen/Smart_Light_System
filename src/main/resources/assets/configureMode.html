@@ -1,25 +1,18 @@
 <div class="example-container">
     <div class="example-row" ng-controller="ExampleController1">
 
-        <h3>Your apartement :</h3>
+        <div class="example-title">Rooms</div>
         <div class="row">
             <div class="col-lg-4 col-xs-12 col-md-6">
                 <div class="row roomrow">
-                    <div>
-                        <a href="#" class="roomDiv thumbnail" ng-click="setSelected(apartement)"
-                           style="min-height: 160px">
-                            <div class="img-container">
-                                <div class="positioning">
-                                </div>
-                                <i class="fa fa-home fa-4x" style="margin-top: 40px" aria-hidden="true"></i>
-                            </div>
-                        </a>
-                    </div>
                     <div ng-repeat="room in rooms">
                         <a href="#" class="roomDiv thumbnail" ng-click="setSelected(room)">
                             <div class="img-container">
                                 <div class="positioning">
                                     <span ng-bind="room.name"></span>
+                                </div>
+                                <div class="positioningLamp" ng-repeat="device in room.devices">
+                                    <i class="fa fa-lightbulb-o" aria-hidden="true"> - {{device.name}}</i>
                                 </div>
                                 <img ng-src="img/roomtemplate.png"/>
                             </div>
@@ -29,13 +22,7 @@
             </div>
             <div class="buttonrow col-lg-4 col-xs-12 col-md-6">
                 <div class="row">
-                    <h3 ng-bind="selected.name"></h3>
-                </div>
-
-                <div class="row">
-                    <div ng-repeat="device in devices">
-                        <i class="fa fa-lightbulb-o" aria-hidden="true"> - {{device.name}}</i>
-                    </div>
+                    <h3 ng-bind="'Selected area : ' + selected.name"></h3>
                 </div>
 
                 <div class="row">
@@ -48,8 +35,7 @@
                            data-slider-min="0"
                            data-slider-max="100"
                            data-slider-step="1" data-slider-value="100"/>
-                    <button class="btn btn-primary btn-large pull-right" ng-click="sendSettings()">Load settings
-                    </button>
+                    <button class="btn btn-primary btn-large" ng-click="sendSettings()">Load settings</button>
 
                 </div>
                 <div class="row">
@@ -60,8 +46,7 @@
                             <option ng-repeat="mode in modes">{{mode.name}}</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary btn-large pull-right" ng-click="sendLightmode()">Load lightmode
-                    </button>
+                    <button class="btn btn-primary btn-large" ng-click="sendLightmode()">Load lightmode</button>
 
                 </div>
             </div>

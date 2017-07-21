@@ -78,14 +78,14 @@ public final class Controller extends AbstractIOLITEApp {
     public static LightMode partyMode4 = new LightMode(1, 240.0, 100.0, "Party4");
     public static LightMode sleepingMode = new LightMode(3, 2.0, 100.0, "Sleeping");
     public static LightMode movieMode = new LightMode(10, 275, 57, "Movie");
-    public static LightMode workingMode = new LightMode(100, 0.0, 100.0, "Working");
+    public static LightMode workingMode = new LightMode(100, 0.0, 0.0, "Working");
 
     /**
      * front end assets
      */
     private Disposeable disposeableAssets;
     DeviceLogger dLogger = new DeviceLogger(LOGGER);
-    Movement movement = new Movement();
+    Movement movement = new Movement(LOGGER, deviceAPI, environmentAPI);
     AutoMode autoMode = new AutoMode();
     protected static List<Location> rooms;
     private processHttp processHttp = new processHttp();
@@ -177,10 +177,6 @@ public final class Controller extends AbstractIOLITEApp {
             for (final PlaceSchedule placeSchedule : this.heatingAPI.getHeatingSchedulesOfPlaces()) {
                 LOGGER.debug("Heating schedule found for place '{}'", placeSchedule.getPlaceIdentifier());
             }
-            allModes.add(partyMode1);
-            allModes.add(partyMode2);
-            allModes.add(partyMode3);
-            allModes.add(partyMode4);
             allModes.add(sleepingMode);
             allModes.add(movieMode);
             allModes.add(romaticMode);
@@ -201,10 +197,9 @@ public final class Controller extends AbstractIOLITEApp {
         }
 
         LOGGER.debug("Started");
-        movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
+        movement.detectMovement();
         autoMode.activateAutopilot(LOGGER, deviceAPI, environmentAPI);
-/*		speechThreadshouldStart = true;
-        executeVoiceCommand();*/
+
     }
 
     /**
@@ -343,16 +338,20 @@ public final class Controller extends AbstractIOLITEApp {
         // default handler returning a not found status
         this.frontendAPI.registerDefaultRequestHandler(new NotFoundResponseHandler());
 
+
+        voiceCommandRequestHandler voicer = new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI);
         // example JSON request handlers
         this.frontendAPI.registerRequestHandler("rooms", new RoomsResponseHandler(environmentAPI));
-        this.frontendAPI.registerRequestHandler("devices", new DevicesResponseHandler(LOGGER, deviceAPI));
         this.frontendAPI.registerRequestHandler("setValue", new setPropertyRequestHandler(LOGGER, deviceAPI, environmentAPI));
         this.frontendAPI.registerRequestHandler("roomsWithDevs", new RoomsWithDevicesResponseHandler(environmentAPI, deviceAPI, LOGGER));
-        this.frontendAPI.registerRequestHandler("startVoice", new voiceCommandRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
+        this.frontendAPI.registerRequestHandler("startVoice", voicer);
         this.frontendAPI.registerRequestHandler("getAllModes", new ModesResponseHandler(LOGGER, allModes));
         this.frontendAPI.registerRequestHandler("getStatus", new StatusResponseHandler(LOGGER, storageAPI));
-        this.frontendAPI.registerRequestHandler("changeAllLights", new changeAllLightsRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
-
+        this.frontendAPI.registerRequestHandler("changeAllLights", new changeAllLightsRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI, voicer.voice));
+        this.frontendAPI.registerRequestHandler("changeSettings", new changeSettingsOfLightRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
+        this.frontendAPI.registerRequestHandler("changeLightmode", new changeLightmodeRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
+        this.frontendAPI.registerRequestHandler("startDetect", new movementDetectRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
+        ;
 
         this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());
     }
@@ -367,62 +366,5 @@ public final class Controller extends AbstractIOLITEApp {
             throw new InitializeFailedException("Loading templates for the dummy app failed", e);
         }
     }
-
-//	protected Runnable startSpeechThread() {
-//		class speechThread implements Runnable {
-//   
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-//				try {
-//					
-//					LOGGER.debug("INFO", "You can start to speak...\n");
-//
-//					while (speechThreadshouldStart) {
-//						/*
-//						 * This method will return when the end of speech is
-//						 * reached.
-//						 */
-//						SpeechResult speechResult = recognizer.getResult();
-//						if (speechResult != null) {
-//
-//							speech = speechResult.getHypothesis();
-//							LOGGER.debug("You said: [" + speech + "]\n");
-//							processSpeech(speech);
-//
-//							speech = null;
-//							speechResult = null;
-//							scheduler.wait(3000);
-//
-//						} else
-//							LOGGER.debug("INFO", "I can't understand what you said.\n");
-//
-//					}
-//					if(speechThreadShouldEnd){
-//						recognizer.stopRecognition();
-//					
-//						speechThreadshouldStart = false;
-//					}
-//					
-//				} catch (Exception ex) {
-//					LOGGER.debug("WARNING", null, ex);
-//					try{
-//						recognizer.stopRecognition();
-//					}
-//					catch(Exception e){
-//						LOGGER.debug("ERROR",e.getMessage().toString());
-//					}
-//	
-//				}
-//
-//				LOGGER.debug("INFO", "SpeechThread has exited...");
-//				
-//
-//			}
-//
-//		}
-//		return new speechThread();
-//
-//	}
 
 }

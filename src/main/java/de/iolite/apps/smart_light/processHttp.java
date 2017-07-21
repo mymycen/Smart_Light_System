@@ -24,9 +24,21 @@ public class processHttp {
             final StringBuilder stringBuilder = new StringBuilder();
             String line;
             while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
                 stringBuilder.append(line);
             }
             return stringBuilder.toString();
         }
+    }
+
+    public String readJSONData(final IOLITEHTTPRequest request) throws IOException {
+        final String charset = getCharset(request);
+        String line = "{}";
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(request.getContent(), charset))) {
+            if ((line = bufferedReader.readLine()) != null) {
+                return line;
+            }
+        }
+        return line;
     }
 }

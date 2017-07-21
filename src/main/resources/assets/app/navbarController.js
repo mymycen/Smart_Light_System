@@ -4,12 +4,12 @@
 (function() {
     'use strict';
 
-    var exampleApp = angular.module('exampleApp');
+    var SmartLightApp = angular.module('SmartLightApp');
 
     /**
      * This controller calls 'rooms' and 'devices' request handlers which are registered in the ExampleApp.java.
      */
-    exampleApp.controller('navbarController', [ '$scope', '$http', function($scope, $http) {
+    SmartLightApp.controller('navbarController', [ '$scope', '$http', function($scope, $http) {
 
     } ]);
 })();
