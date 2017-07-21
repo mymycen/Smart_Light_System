@@ -85,8 +85,6 @@ public final class Controller extends AbstractIOLITEApp {
      */
     private Disposeable disposeableAssets;
     DeviceLogger dLogger = new DeviceLogger(LOGGER);
-    Movement2 movement = new Movement2();
-    AutoMode autoMode = new AutoMode();
     protected static List<Location> rooms;
     private processHttp processHttp = new processHttp();
 
@@ -197,8 +195,6 @@ public final class Controller extends AbstractIOLITEApp {
         }
 
         LOGGER.debug("Started");
-        movement.detectMovement(LOGGER, deviceAPI, environmentAPI);
-        autoMode.activateAutopilot(LOGGER, deviceAPI, environmentAPI);
 
     }
 
@@ -352,6 +348,7 @@ public final class Controller extends AbstractIOLITEApp {
         this.frontendAPI.registerRequestHandler("changeLightmode", new changeLightmodeRequestHandler(LOGGER, deviceAPI, environmentAPI, voicer.voice));
         this.frontendAPI.registerRequestHandler("startDetect", new movementDetectRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
         this.frontendAPI.registerRequestHandler("configureLightmode", new configureRequestHandler(LOGGER, voicer.voice));
+        this.frontendAPI.registerRequestHandler("startAuto", new autoModeRequestHandler(LOGGER, deviceAPI, environmentAPI, storageAPI));
 
 
         this.frontendAPI.registerRequestHandler("get_devices.json", new DeviceJSONRequestHandler());
