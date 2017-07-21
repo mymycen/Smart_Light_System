@@ -125,38 +125,7 @@ public class AutoMode {
 											
 											
 										}
-										if(temp<=20){	for (Device dimm: deviceList){
-											if(dimm.getProfileIdentifier().equals("http://iolite.de#HSVLamp")){
-												
-												DeviceDoubleProperty hue = dimm.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_hue_ID);
-												DeviceDoubleProperty saturation = dimm.getDoubleProperty(DriverConstants.PROFILE_PROPERTY_HSVLamp_saturation_ID);	
-												DeviceDoubleProperty dimmingLevel = dimm.getDoubleProperty(DriverConstants.PROPERTY_dimmingLevel_ID);
-												
-												try {
-													dimmingLevel.requestValueUpdate(100.0);
-													saturation.requestValueUpdate(85.0);
-													hue.requestValueUpdate(1.0);
-
-													
-													
-												} catch (DeviceAPIException e) {
-													// TODO Auto-generated catch block
-													e.printStackTrace();
-												}
-											
-											
-											}
-											
-																							
-											
-										}
-											
-											
 										
-				
-											
-											
-										}
 										}
 											}
 										}
