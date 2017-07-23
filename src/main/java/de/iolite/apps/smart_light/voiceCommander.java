@@ -50,23 +50,27 @@ public class voiceCommander {
     }
 
     ;
-
+    // Constructor of the class 
     public voiceCommander(Logger LOGGER, DeviceAPI deviceAPI, EnvironmentAPI environmentAPI) {
         this.LOGGER = LOGGER;
         this.deviceAPI = deviceAPI;
         this.environmentAPI = environmentAPI;
         rooms = environmentAPI.getLocations();
 
-        // Configuration
-
+        
     }
+    
+    //This methode will be called to stop the voice recognition
 
     public void stopRecognition() {
         speechThreadShouldEnd = false;
-        LOGGER.info("SHIT`1");
+        
         if (recognizer != null)
             recognizer.stopRecognition();
     }
+    
+    
+    //Voice recognizer will be initialized and configured here
 
     public void executeVoiceCommand() {
 
@@ -122,18 +126,25 @@ public class voiceCommander {
         }
 
     }
+    
+/*    This method processes the speech that recognized. Only when the word "alice" is recognized, 
+ *    the system will process the command after that. And after a command is executed, the system will return 
+ *    to the idle state and waiting for "alice".
+ */    
 
     public void processSpeech(String result) throws DeviceAPIException, InterruptedException {
-
+        //process command "alice"
         if (result != null && result.toLowerCase().contains("alice")) {
             started = true;
             stopped = false;
             playSound.playMp3(voiceCommander.Commands.READY.toString());
 
+        // process command "stop"    
         } else if (result != null && result.toLowerCase().contains("stop")) {
             stopped = true;
             started = false;
 
+        // set the location to root. The command after that will be applied to all rooms   
         } else if (result != null && started == true && result.toLowerCase().contains("to")
                 && result.toLowerCase().contains("root")) {
             stopped = true;
@@ -142,6 +153,7 @@ public class voiceCommander {
             currentLocation = "root";
             playSound.playMp3(voiceCommander.Commands.TO_ROOT.toString());
 
+          // set the location to living room  
         } else if (result != null && started == true && result.toLowerCase().contains("living room")) {
             stopped = true;
             started = false;
@@ -152,6 +164,8 @@ public class voiceCommander {
 
                 }
             }
+            
+            //set the location to "bedroom"
 
         } else if (result != null && started == true && result.toLowerCase().contains("bedroom")) {
             stopped = true;
@@ -163,6 +177,8 @@ public class voiceCommander {
 
                 }
             }
+            
+            //set the location to "kitchen"
 
         } else if (result != null && started == true && result.toLowerCase().contains("kitchen")) {
             stopped = true;
@@ -175,6 +191,8 @@ public class voiceCommander {
 
                 }
             }
+            
+            //set the location to office
 
         } else if (result != null && started == true && result.toLowerCase().contains("office")) {
             stopped = true;
@@ -187,6 +205,8 @@ public class voiceCommander {
                 }
 
             }
+            
+            //turn light on
 
         } else if (result != null && started == true && result.toLowerCase().contains("light")
                 && result.toLowerCase().contains("on")) {
@@ -309,6 +329,8 @@ public class voiceCommander {
                 playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_ON.toString());
                 isCommandExecuted = false;
             }
+            
+            // turn light off
 
         } else if (result != null && started == true && result.toLowerCase().contains("light")
                 && result.toLowerCase().contains("off")) {
@@ -429,6 +451,8 @@ public class voiceCommander {
                 playSound.playMp3(voiceCommander.Commands.TURN_LIGHT_OFF.toString());
                 isCommandExecuted = false;
             }
+            
+            //executing romantic mode
 
         } else if (result != null && started == true && result.toLowerCase().contains("romantic")) {
 
@@ -580,6 +604,8 @@ public class voiceCommander {
 				isCommandExecuted = false;
 
 			}
+			
+			//executing party mode (playing 4 different light modes with 4 timers)
 
 		} else if (result != null && started == true && result.toLowerCase().contains("party")) {
 			started = false;
@@ -617,6 +643,8 @@ public class voiceCommander {
 
 				}
 			}
+			
+			//executing sleeping mode
 			
 		} else if (result != null && started == true && result.toLowerCase().contains("sleeping")) {
 			started = false;
@@ -767,6 +795,7 @@ public class voiceCommander {
 				isCommandExecuted = false;
 
 			}
+			//executing movie mode
 		} else if (result != null && started == true && result.toLowerCase().contains("movie")) {
 			started = false;
 			stopped = true;
@@ -916,6 +945,8 @@ public class voiceCommander {
 				isCommandExecuted = false;
 
 			}
+			
+			//executing working mode
 		} else if (result != null && started == true && result.toLowerCase().contains("working")) {
 			started = false;
 			stopped = true;
@@ -1063,6 +1094,7 @@ public class voiceCommander {
 
 			}
 		}
+        // increase light intensity. If the maximal brightness has been reached, the user will be informed
 		else if (result != null && started == true && result.toLowerCase().contains("light")
 				&& result.toLowerCase().contains("brighter")) {
 			stopped = true;
@@ -1173,6 +1205,7 @@ public class voiceCommander {
 			}
 
 		}
+        //making light darker. If the minimal brightness has been reached, the user will be informed
 		else if (result != null && started == true && result.toLowerCase().contains("light")
 				&& result.toLowerCase().contains("darker")) {
 			stopped = true;
@@ -1286,6 +1319,8 @@ public class voiceCommander {
 		}
 
 	}
+    
+    //This method is used to play the light modes in the party mode 
 
 	public class runPartyLight extends TimerTask {
 		int dimmingLevel;
