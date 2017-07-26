@@ -12,7 +12,9 @@ import de.iolite.drivers.basic.DriverConstants;
 import org.slf4j.Logger;
 
 import java.util.List;
-
+/**
+ * Author Massi Wakeli 
+ */
 public class AutoMode {
 
     //public LightMode hot = new LightMode (1,100,85,"hot");
